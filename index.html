@@ -3,129 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trivia Fútbol Pro 100</title>
+    <title>Trivia Fútbol Máster 1000</title>
     <style>
         :root {
             --bg: #0f172a; --card: #1e293b; --gold: #fbce07; --white: #f8fafc;
             --n1: #22c55e; --n2: #f97316; --n3: #ef4444;
         }
         body { font-family: sans-serif; background: var(--bg); color: var(--white); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        #game-container { background: var(--card); width: 90%; max-width: 600px; padding: 2rem; border-radius: 1rem; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative;}
-        
-        .bar-container { width: 100%; height: 8px; background: #334155; border-radius: 4px; margin: 15px 0; overflow: hidden; }
+        #game-container { background: var(--card); width: 95%; max-width: 650px; padding: 2rem; border-radius: 1.5rem; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); }
+        .bar-container { width: 100%; height: 10px; background: #334155; border-radius: 5px; margin: 20px 0; overflow: hidden; }
         #timer-bar { width: 100%; height: 100%; background: var(--gold); transition: width 0.1s linear; }
-        
-        #lvl-tag { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; background: var(--gold); color: #000; text-transform: uppercase; margin-bottom: 10px;}
-        .q-text { font-size: 1.5rem; font-weight: bold; margin-bottom: 2rem; min-height: 4.5rem; }
-        
+        #lvl-tag { display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; background: var(--gold); color: #000; text-transform: uppercase; margin-bottom: 10px; }
+        .q-text { font-size: 1.6rem; font-weight: bold; margin-bottom: 2rem; min-height: 5rem; line-height: 1.2; }
         .options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         @media (max-width: 480px) { .options { grid-template-columns: 1fr; } }
-        
-        button.btn { display: block; width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid #475569; color: white; border-radius: 8px; cursor: pointer; font-size: 1.1rem; transition: 0.2s; }
-        button.btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); border-color: var(--gold); transform: translateY(-2px); }
-        button.btn:disabled { opacity: 0.6; cursor: not-serif; }
-        
-        .correct { background: var(--n1) !important; color: #052e16 !important; font-weight: bold; border-color: var(--n1) !important;}
+        button.btn { display: block; width: 100%; padding: 16px; background: rgba(255,255,255,0.05); border: 1px solid #475569; color: white; border-radius: 12px; cursor: pointer; font-size: 1.1rem; transition: 0.2s; }
+        button.btn:hover:not(:disabled) { background: rgba(255,255,255,0.12); border-color: var(--gold); transform: translateY(-2px); }
+        .correct { background: var(--n1) !important; color: #052e16 !important; font-weight: bold; border-color: var(--n1) !important; }
         .wrong { background: var(--n3) !important; border-color: var(--n3) !important; }
-        
+        #stats { margin-top: 25px; font-size: 1rem; opacity: 0.8; display: flex; justify-content: space-between; border-top: 1px solid #334155; padding-top: 15px; }
         .hidden { display: none; }
-        #stats { margin-top: 20px; font-size: 0.9rem; opacity: 0.7; display: flex; justify-content: space-between; border-top: 1px solid #334155; padding-top: 10px;}
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div id="setup">
-        <h1>Trivia Fútbol Máster</h1>
-        <p>Cargando base de datos de 100 preguntas...</p>
-    </div>
-
-    <div id="quiz" class="hidden">
-        <span id="lvl-tag">NIVEL 1</span>
+    <div id="quiz">
+        <span id="lvl-tag">CARGANDO...</span>
         <div class="bar-container"><div id="timer-bar"></div></div>
-        <div id="status" style="color: var(--gold); font-weight: bold; height: 1.2rem; margin-bottom: 10px;"></div>
-        <div class="q-text" id="q-text"></div>
+        <div id="status" style="color: var(--gold); font-weight: bold; height: 1.2rem; margin-bottom: 10px; font-size: 0.9rem;"></div>
+        <div class="q-text" id="q-text">Preparando el campo de juego...</div>
         <div class="options" id="options"></div>
         <div id="stats">
-            <span>Partido: <b id="q-count">0</b>/♾️</span>
+            <span>Pregunta: <b id="q-count">0</b></span>
             <span>Goles: <b id="score">0</b> ⚽</span>
         </div>
-    </div>
-
-    <div id="end" class="hidden">
-        <h1>Fin del Partido</h1>
-        <p id="final-stats"></p>
-        <button class="btn" onclick="location.reload()">Jugar de nuevo</button>
     </div>
 </div>
 
 <script>
-    let allQuestions = []; // La base de datos completa de 100
-    let usedQuestions = []; // Preguntas ya mostradas
+    // BASE DE DATOS INTEGRADA (Mínimo esfuerzo: añade aquí todas las que quieras)
+    const db = [
+        // NIVEL 1: CANTERA
+        {"d": 1, "q": "¿Quién ganó el Mundial de Qatar 2022 con Argentina?", "a": ["Lionel Messi", "Cristiano Ronaldo", "Mbappé"], "c": 0},
+        {"d": 1, "q": "¿En qué club juega Lamine Yamal?", "a": ["Real Madrid", "FC Barcelona", "Man. City"], "c": 1},
+        {"d": 1, "q": "¿Cuántos Balones de Oro tiene Messi?", "a": ["5", "7", "8"], "c": 2},
+        {"d": 1, "q": "¿Cómo se llama el estadio del Real Madrid?", "a": ["Camp Nou", "Santiago Bernabéu", "San Siro"], "c": 1},
+        {"d": 1, "q": "¿Qué selección ganó la Eurocopa 2024?", "a": ["Francia", "Inglaterra", "España"], "c": 2},
+        {"d": 1, "q": "¿En qué país juega Cristiano Ronaldo?", "a": ["USA", "Arabia Saudí", "Portugal"], "c": 1},
+        {"d": 1, "q": "¿Quién ganó la Champions League 2024?", "a": ["Dortmund", "Man. City", "Real Madrid"], "c": 2},
+        {"d": 1, "q": "¿Cuál es el color de la camiseta de Brasil?", "a": ["Azul", "Amarillo", "Verde"], "c": 1},
+        {"d": 1, "q": "¿En qué ciudad está el Camp Nou?", "a": ["Madrid", "Barcelona", "Sevilla"], "c": 1},
+        {"d": 1, "q": "¿Qué país ganó la Copa América 2024?", "a": ["Argentina", "Colombia", "Brasil"], "c": 0},
+        {"d": 1, "q": "¿Qué equipo ganó el Mundial de Sudáfrica 2010?", "a": ["Holanda", "España", "Alemania"], "c": 1},
+        {"d": 1, "q": "¿Quién es apodado 'La Pulga'?", "a": ["Cristiano", "Maradona", "Messi"], "c": 2},
+        {"d": 1, "q": "¿Cuántos jugadores hay en el campo por equipo?", "a": ["7", "11", "12"], "c": 1},
+        {"d": 1, "q": "¿Quién usa guantes en el equipo?", "a": ["Delantero", "Portero", "Defensa"], "c": 1},
+        {"d": 1, "q": "¿En qué país nació Pelé?", "a": ["Argentina", "Uruguay", "Brasil"], "c": 2},
+
+        // NIVEL 2: PROFESIONAL
+        {"d": 2, "q": "¿Qué equipo ganó el 'Sextete' en 2009?", "a": ["Bayern", "FC Barcelona", "Inter"], "c": 1},
+        {"d": 2, "q": "¿Quién marcó el gol de la victoria en el Mundial 2014?", "a": ["Götze", "Müller", "Klose"], "c": 0},
+        {"d": 2, "q": "¿Cuántas Champions seguidas ganó Zidane como DT?", "a": ["2", "3", "4"], "c": 1},
+        {"d": 2, "q": "¿Quién era el portero de España en 2010?", "a": ["Valdés", "Casillas", "Reina"], "c": 1},
+        {"d": 2, "q": "¿Qué equipo ganó la Champions 2023 en Estambul?", "a": ["Inter", "Real Madrid", "Man. City"], "c": 2},
+        {"d": 2, "q": "¿En qué club jugaba Neymar antes de ir al PSG?", "a": ["Real Madrid", "FC Barcelona", "Santos"], "c": 1},
+        {"d": 2, "q": "¿Quién ganó el Balón de Oro en 2022?", "a": ["Benzema", "Messi", "Modric"], "c": 0},
+        {"d": 2, "q": "¿En qué país se celebró el Mundial 2014?", "a": ["Rusia", "Brasil", "Sudáfrica"], "c": 1},
+        {"d": 2, "q": "¿Qué selección eliminó a Brasil por 1-7?", "a": ["Argentina", "Francia", "Alemania"], "c": 2},
+        {"d": 2, "q": "¿Qué dorsal llevó Ronaldinho en el Barça?", "a": ["7", "10", "11"], "c": 1},
+
+        // NIVEL 3: ÉLITE MUNDIAL
+        {"d": 3, "q": "¿Quién fue el MVP de la final de Champions 2024?", "a": ["Vinícius Jr", "Carvajal", "Bellingham"], "c": 1},
+        {"d": 3, "q": "¿Qué selección africana llegó a semis en 2022?", "a": ["Ghana", "Senegal", "Marruecos"], "c": 2},
+        {"d": 3, "q": "¿Qué equipo terminó invicto la Premier 2003-04?", "a": ["Man. United", "Chelsea", "Arsenal"], "c": 2},
+        {"d": 3, "q": "¿Quién ganó el Balón de Oro 2004?", "a": ["Ronaldinho", "Shevchenko", "Deco"], "c": 1},
+        {"d": 3, "q": "¿En qué estadio será la final del Mundial 2026?", "a": ["Azteca", "MetLife Stadium", "SoFi"], "c": 1},
+        {"d": 3, "q": "¿Qué dorsal llevaba Zidane en el Real Madrid?", "a": ["5", "10", "21"], "c": 0},
+        {"d": 3, "q": "¿Qué equipo cortó la racha de 11 Bundesligas del Bayern en 2024?", "a": ["Dortmund", "Leverkusen", "Leipzig"], "c": 1},
+        {"d": 3, "q": "¿Qué portero no encajó goles en eliminatorias del Mundial 2010?", "a": ["Casillas", "Neuer", "Buffon"], "c": 0},
+        {"d": 3, "q": "¿Quién ganó el Balón de Oro 2007?", "a": ["Cristiano", "Kaká", "Messi"], "c": 1},
+        {"d": 3, "q": "¿Cuántas Eurocopas seguidas ganó España (2008-2012)?", "a": ["Una", "Dos", "Tres"], "c": 1}
+    ];
+
     let currentIdx = 0;
     let score = 0;
     let timer;
     let difficulty = 1;
+    let usedInLevel = [];
 
-    const READ_MS = 3000; // 3s para leer
-    const ACTION_MS = 8000; // 8s para responder
+    const READ_TIME = 3000;
+    const ACTION_TIME = 8000;
 
-    // 1. CARGAR PREGUNTAS DESDE EL JSON EXTERNO
-    async function loadDB() {
-        try {
-            const response = await fetch('preguntas.json');
-            allQuestions = await response.json();
-            
-            if (allQuestions.length < 100) {
-                console.warn("La base de datos tiene menos de 100 preguntas.");
-            }
-            startQuiz();
-        } catch (e) {
-            document.querySelector('#setup p').innerText = "Error: Asegúrate de tener el archivo preguntas.json en la misma carpeta.";
-            console.error(e);
-        }
-    }
-
-    function startQuiz() {
-        document.getElementById('setup').classList.add('hidden');
-        document.getElementById('quiz').classList.remove('hidden');
-        usedQuestions = [];
+    function init() {
         showQuestion();
     }
 
     function showQuestion() {
-        // Filtrar preguntas por dificultad actual
-        let pool = allQuestions.filter(q => q.d === difficulty);
+        // Filtrar por dificultad
+        let pool = db.filter(q => q.d === difficulty);
         
-        // Si no quedan preguntas de este nivel, resetear y usar todas las de ese nivel
-        if (pool.length === 0) {
-            console.warn(`Se acabaron las preguntas del nivel ${difficulty}. Reseteando nivel.`);
-            // Opcional: Podrías subir la dificultad automáticamente o ciclar
-            difficulty = 1; // Volver a empezar
-            pool = allQuestions.filter(q => q.d === 1);
+        // Si usamos todas las de este nivel, resetear historial del nivel
+        let available = pool.filter(q => !usedInLevel.includes(q));
+        if(available.length === 0) {
+            usedInLevel = usedInLevel.filter(q => q.d !== difficulty);
+            available = pool;
         }
 
-        // Elegir una pregunta aleatoria de este nivel que no se haya usado
-        let availablePool = pool.filter(q => !usedQuestions.includes(q));
-        
-        // Si se usaron todas, resetear las preguntas usadas para ese nivel
-        if (availablePool.length === 0) {
-            console.log(`Reseteando preguntas usadas del nivel ${difficulty}.`);
-            availablePool = pool;
-            // Limpiar las preguntas de este nivel de la lista de usadas
-            usedQuestions = usedQuestions.filter(q => q.d !== difficulty);
-        }
+        const data = available[Math.floor(Math.random() * available.length)];
+        usedInLevel.push(data);
+        currentIdx++;
 
-        const data = availablePool[Math.floor(Math.random() * availablePool.length)];
-        usedQuestions.push(data);
-        currentIdx++; // Contador infinito
-
+        // UI
         document.getElementById('q-text').innerText = data.q;
+        document.getElementById('q-count').innerText = currentIdx;
         const tag = document.getElementById('lvl-tag');
         tag.innerText = data.d === 1 ? "Cantera" : data.d === 2 ? "Profesional" : "Élite Mundial";
         tag.style.background = data.d === 1 ? "var(--n1)" : data.d === 2 ? "var(--n2)" : "var(--n3)";
         tag.style.color = data.d === 3 ? "white" : "black";
-        
+
         const opts = document.getElementById('options');
         opts.innerHTML = '';
         data.a.forEach((opt, i) => {
@@ -136,71 +132,51 @@
             opts.appendChild(b);
         });
 
-        // Configuración de Tiempos con Pausa
         const bar = document.getElementById('timer-bar');
         const status = document.getElementById('status');
         bar.style.width = '100%';
         bar.style.background = '#475569';
-        status.innerText = "⚽ Analizando jugada... (Lee)";
+        status.innerText = "⚽ Lee la jugada...";
 
         setTimeout(() => {
-            // Verificar que seguimos en la misma pregunta (para evitar saltos)
-            if (usedQuestions[usedQuestions.length - 1] === data) {
-                status.innerText = "🔥 ¡DECIDE RÁPIDO!";
+            if(usedInLevel[usedInLevel.length-1] === data) {
+                status.innerText = "🔥 ¡DISPARA!";
                 bar.style.background = "var(--gold)";
-                startCountdown();
+                startTimer();
             }
-        }, READ_MS);
+        }, READ_TIME);
     }
 
-    function startCountdown() {
-        let startTime = Date.now();
-        
+    function startTimer() {
+        let start = Date.now();
+        clearInterval(timer);
         timer = setInterval(() => {
-            let elapsed = Date.now() - startTime;
-            let percentage = 100 - (elapsed / ACTION_MS * 100);
-            document.getElementById('timer-bar').style.width = percentage + '%';
-            
-            if (percentage <= 0) {
-                clearInterval(timer);
-                check(-1, usedQuestions[usedQuestions.length-1].c, null);
-            }
+            let elapsed = Date.now() - start;
+            let per = 100 - (elapsed / ACTION_TIME * 100);
+            document.getElementById('timer-bar').style.width = per + '%';
+            if(per <= 0) { clearInterval(timer); check(-1, usedInLevel[usedInLevel.length-1].c, null); }
         }, 50);
     }
 
-    function check(selected, correct, btn) {
+    function check(sel, cor, btn) {
         clearInterval(timer);
         const btns = document.querySelectorAll('.btn');
         btns.forEach(b => b.disabled = true);
 
-        if (selected === correct) {
+        if(sel === cor) {
             btn.classList.add('correct');
             score++;
-            // Subir dificultad cada 5 aciertos
-            if (score % 5 === 0 && difficulty < 3) difficulty++;
-        } else if (btn) {
-            btn.classList.add('wrong');
-            btns[correct].classList.add('correct');
+            if(score % 5 === 0 && difficulty < 3) difficulty++;
         } else {
-             // Tiempo agotado
-             btns[correct].classList.add('correct');
-             document.getElementById('status').innerText = "⚠️ ¡TIEMPO AGOTADO!";
+            if(btn) btn.classList.add('wrong');
+            btns[cor].classList.add('correct');
         }
 
         document.getElementById('score').innerText = score;
-        document.getElementById('q-count').innerText = currentIdx;
         setTimeout(showQuestion, 1500);
     }
 
-    // El juego ya no para, así que endGame() no se llama automáticamente.
-    // Podrías añadir un botón de "Finalizar Partido" que llame a endGame().
-    function endGame() {
-        document.getElementById('quiz').classList.add('hidden');
-        document.getElementById('end').classList.remove('hidden');
-        document.getElementById('final-stats').innerText = `Has marcado ${score} goles.`;
-    }
-
-    loadDB();
+    init();
 </script>
 </body>
 </html>
