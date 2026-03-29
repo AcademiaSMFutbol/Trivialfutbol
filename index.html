@@ -6,6 +6,7 @@
     <title>Trivial Fútbol - 501 preguntas</title>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
         :root {
@@ -26,84 +27,32 @@
         }
 
         body.error-flash { background-color: var(--rojo-error) !important; }
-
         .pantalla { display: none; flex-direction: column; align-items: center; padding: 20px; flex: 1; animation: fadeIn 0.4s; }
         .activa { display: flex; }
-
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         h1 { color: var(--verde-sm); font-size: 2.8rem; margin: 15px 0; text-shadow: 1px 1px 3px rgba(0,0,0,0.1); }
+        
+        /* Iconos de Categoría */
+        .icono-pregunta { font-size: 1.6rem; margin-right: 10px; }
 
-        /* Ranking Card */
-        .ranking-card {
-            background: white;
-            border-top: 6px solid var(--verde-sm);
-            border-radius: 12px;
-            width: 100%;
-            max-width: 380px;
-            padding: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-
+        .ranking-card { background: white; border-top: 6px solid var(--verde-sm); border-radius: 12px; width: 100%; max-width: 380px; padding: 20px; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         table { width: 100%; border-collapse: collapse; font-family: 'Courier New', monospace; font-size: 1.3rem; }
         th { font-size: 0.8rem; color: #999; border-bottom: 1px solid #eee; padding-bottom: 8px; }
         td { padding: 10px 5px; border-bottom: 1px solid #f9f9f9; text-align: center; }
         .pos { color: var(--verde-sm); font-weight: bold; }
 
-        /* Timer Bar */
         #timer-container { width: 100%; max-width: 550px; height: 10px; background: #ddd; border-radius: 5px; margin-bottom: 20px; overflow: hidden; }
         #timer-bar { width: 100%; height: 100%; background: var(--verde-sm); transition: width 0.1s linear; }
 
-        /* Botón Jugar */
-        .btn-play {
-            background: var(--verde-sm);
-            color: white;
-            border: none;
-            padding: 20px 45px;
-            font-size: 1.4rem;
-            font-weight: bold;
-            border-radius: 10px;
-            cursor: pointer;
-            box-shadow: 0 6px 0 var(--verde-oscuro);
-            transition: 0.1s;
-        }
+        .btn-play { background: var(--verde-sm); color: white; border: none; padding: 20px 45px; font-size: 1.4rem; font-weight: bold; border-radius: 10px; cursor: pointer; box-shadow: 0 6px 0 var(--verde-oscuro); transition: 0.1s; }
         .btn-play:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--verde-oscuro); }
 
-        /* Quiz Box */
-        #quiz-box {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            width: 100%;
-            max-width: 550px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-        }
-
-        .opcion {
-            background: #fdfdfd;
-            border: 2px solid #eee;
-            margin: 10px 0;
-            padding: 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: left;
-            font-size: 1.1rem;
-            transition: 0.2s;
-        }
+        #quiz-box { background: white; padding: 25px; border-radius: 15px; width: 100%; max-width: 550px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .opcion { background: #fdfdfd; border: 2px solid #eee; margin: 10px 0; padding: 15px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 1.1rem; }
         .opcion:hover { border-color: var(--verde-sm); background: #f1f8f1; transform: scale(1.02); }
 
-        /* Footer */
-        footer {
-            background: var(--verde-sm);
-            color: white;
-            padding: 25px;
-            width: 100%;
-            margin-top: auto;
-            border-top: 4px solid var(--dorado);
-            text-align: center;
-        }
-        footer strong { color: var(--dorado); }
+        footer { background: var(--verde-sm); color: white; padding: 25px; width: 100%; margin-top: auto; border-top: 4px solid var(--dorado); text-align: center; }
     </style>
 </head>
 <body>
@@ -111,13 +60,13 @@
     <section id="pantalla-inicio" class="pantalla activa">
         <h1>Trivial Fútbol</h1>
         <div class="ranking-card">
-            <h3>🏆 TOP 5 GLOBAL</h3>
+            <h3>🏆 TOP 5 GLOBAL SMF</h3>
             <table>
                 <thead><tr><th>POS</th><th>ID</th><th>PTS</th></tr></thead>
                 <tbody id="lista-ranking"></tbody>
             </table>
         </div>
-        <button class="btn-play" onclick="comenzar()">¡SALTAR AL CAMPO!</button>
+        <button class="btn-play" onclick="comenzar()">¡JUGAR!</button>
         <footer>
             <p>Creado por <strong>SM Fútbol 2026</strong></p>
             <p>📧 academiasmfutbol@outlook.es | 📞 625 468 296</p>
@@ -134,7 +83,7 @@
     </section>
 
     <script>
-        // DATOS EXTRAÍDOS DE TU IMAGEN
+        // CONFIGURACIÓN FIREBASE (Tus datos reales)
         const firebaseConfig = {
             apiKey: "AIzaSyDbIz9-3lb5z-G0ywfUDZY2t4mZg-d9Ej0",
             authDomain: "trivialfutbol-79a99.firebaseapp.com",
@@ -145,7 +94,6 @@
             appId: "1:864785036144:web:21a56e580f87bca6b995b5",
             measurementId: "G-QHJX5LF4KW"
         };
-
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
@@ -154,6 +102,7 @@
         let score = 0;
         let tiempoRestante = 10;
         let intervaloTimer;
+        let rankingActual = []; // Para verificar récords al final
 
         async function cargar() {
             const res = await fetch('preguntas.json');
@@ -169,28 +118,29 @@
             nuevaPregunta();
         }
 
+        function getIcono(pregunta) {
+            const p = pregunta.toLowerCase();
+            if (p.includes('mundial') || p.includes('copa del mundo')) return '🌍';
+            if (p.includes('champions')) return '🏆';
+            return '⚽'; // General
+        }
+
         function nuevaPregunta() {
             clearInterval(intervaloTimer);
-            if (pIndex >= db.length) return finalizar("¡CAMPEÓN DEL MUNDO!");
+            if (pIndex >= db.length) return verificarFinalización();
 
             const p = db[pIndex];
-            document.getElementById('pregunta-txt').innerText = p.q;
+            const icono = getIcono(p.q);
+            document.getElementById('pregunta-txt').innerHTML = `<span class="icono-pregunta">${icono}</span> ${p.q}`;
             const grid = document.getElementById('opciones-grid');
             grid.innerHTML = "";
-
             p.a.forEach((txt, i) => {
                 const d = document.createElement('div');
                 d.className = 'opcion';
                 d.innerText = txt;
                 d.onclick = () => {
-                    if (i === p.c) {
-                        score += 10;
-                        document.getElementById('pts-actual').innerText = score;
-                        pIndex++;
-                        nuevaPregunta();
-                    } else {
-                        lanzarError("¡RESPUESTA INCORRECTA!");
-                    }
+                    if (i === p.c) { score += 10; document.getElementById('pts-actual').innerText = score; pIndex++; nuevaPregunta(); }
+                    else { lanzarError("¡RESPUESTA INCORRECTA!"); }
                 };
                 grid.appendChild(d);
             });
@@ -202,7 +152,6 @@
             const bar = document.getElementById('timer-bar');
             bar.style.width = "100%";
             bar.style.backgroundColor = "var(--verde-sm)";
-
             intervaloTimer = setInterval(() => {
                 tiempoRestante -= 0.1;
                 bar.style.width = (tiempoRestante * 10) + "%";
@@ -214,20 +163,57 @@
         function lanzarError(msj) {
             clearInterval(intervaloTimer);
             document.body.classList.add('error-flash');
-            setTimeout(() => {
-                document.body.classList.remove('error-flash');
-                finalizar(msj);
-            }, 300);
+            setTimeout(() => { document.body.classList.remove('error-flash'); verificarFinalización(); }, 300);
         }
 
-        function finalizar(msj) {
-            alert(msj);
-            let id = prompt("PUNTOS: " + score + "\nIniciales (3 letras):");
+        function verificarFinalización() {
+            // Verificamos el récord ANTES de mostrar el prompt
+            let esMundial = rankingActual.length === 0 || score > rankingActual[0].score;
+            let esGlobal = rankingActual.length < 5 || score > rankingActual[rankingActual.length - 1].score;
+
+            if (esMundial) {
+                lanzarConfeti('mundial');
+                setTimeout(() => { alert("¡NUEVO RÉCORD MUNDIAL! Estás en la cima."); pedirIniciales(); }, 1500);
+            } else if (esGlobal) {
+                lanzarConfeti('global');
+                setTimeout(() => { alert("¡NUEVO RÉCORD GLOBAL! Entraste en el Top 5."); pedirIniciales(); }, 1500);
+            } else {
+                pedirIniciales();
+            }
+        }
+
+        function pedirIniciales() {
+            let id = prompt("PUNTOS: " + score + "\nIntroduce tus iniciales (3 letras):");
             if (id) {
                 const nick = id.substring(0, 3).toUpperCase();
                 database.ref('ranking').push({ id: nick, score: score });
             }
             window.location.reload();
+        }
+
+        function lanzarConfeti(tipo) {
+            const count = 200;
+            const defaults = { origin: { y: 0.7 } };
+
+            function fire(particleRatio, opts) {
+                confetti(Object.assign({}, defaults, opts, {
+                    particleCount: Math.floor(count * particleRatio),
+                    colors: tipo === 'mundial' ? ['#FFD700', '#DAA520', '#FFFFFF'] : ['#2E7D32', '#FFD700', '#FFFFFF'], // Dorado para mundial, SMF para global
+                }));
+            }
+
+            if (tipo === 'mundial') {
+                // Explosión continua dorada
+                fire(0.25, { spread: 26, startVelocity: 55, });
+                fire(0.2, { spread: 60, });
+                fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+                fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+                fire(0.1, { spread: 120, startVelocity: 45, });
+            } else {
+                // Explosión simple SMF
+                fire(0.25, { spread: 26, startVelocity: 55, });
+                fire(0.2, { spread: 60, });
+            }
         }
 
         function escucharRankingGlobal() {
@@ -236,6 +222,7 @@
                 let data = [];
                 snapshot.forEach(child => { data.push(child.val()); });
                 data.sort((a, b) => b.score - a.score);
+                rankingActual = data; // Guardamos para comparación
                 list.innerHTML = data.map((j, i) => `
                     <tr><td class="pos">${i+1}</td><td>${j.id}</td><td>${j.score}</td></tr>
                 `).join('');
