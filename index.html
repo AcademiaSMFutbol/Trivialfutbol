@@ -3,218 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trivial Fútbol - 501 preguntas </title>
+    <title>Trivial Fútbol - 501 preguntas</title>
     <style>
         :root {
-            --verde-institucional: #2E7D32;
+            --verde-sm: #2E7D32;
+            --verde-oscuro: #1b5e20;
             --dorado: #FFD700;
-            --gris-claro: #F5F5F5;
+            --rojo-error: #d32f2f;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
             margin: 0;
-            background-color: var(--gris-claro);
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            text-align: center;
+            transition: background-color 0.2s;
         }
 
-        .pantalla { display: none; flex-direction: column; align-items: center; padding: 20px; flex: 1; }
+        /* Efecto Flash de Error */
+        body.error-flash { background-color: var(--rojo-error) !important; }
+
+        .pantalla { display: none; flex-direction: column; align-items: center; padding: 20px; flex: 1; animation: fadeIn 0.4s; }
         .activa { display: flex; }
 
-        h1 { color: var(--verde-institucional); font-size: 2.8rem; margin-bottom: 10px; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Estilo Ranking Arcade */
-        .ranking-container {
+        h1 { color: var(--verde-sm); font-size: 2.8rem; margin: 15px 0; text-shadow: 1px 1px 3px rgba(0,0,0,0.1); }
+
+        /* Ranking Arcade */
+        .ranking-card {
             background: white;
-            border: 4px solid var(--verde-institucional);
+            border-top: 6px solid var(--verde-sm);
             border-radius: 12px;
-            width: 90%;
-            max-width: 400px;
+            width: 100%;
+            max-width: 380px;
             padding: 20px;
-            margin: 20px 0;
+            margin-bottom: 30px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
-        .ranking-container h3 { margin-top: 0; color: var(--verde-institucional); }
+        table { width: 100%; border-collapse: collapse; font-family: 'Courier New', monospace; font-size: 1.3rem; }
+        th { font-size: 0.8rem; color: #999; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        td { padding: 10px 5px; border-bottom: 1px solid #f9f9f9; }
+        .pos { color: var(--verde-sm); font-weight: bold; }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 1.3rem;
-            font-weight: bold;
-        }
-
-        th { border-bottom: 3px solid var(--verde-institucional); padding-bottom: 10px; }
-        td { padding: 12px 5px; color: #333; }
-
-        /* Botones */
-        button {
-            background-color: var(--verde-institucional);
+        /* Botón Principal */
+        .btn-play {
+            background: var(--verde-sm);
             color: white;
             border: none;
-            padding: 18px 40px;
-            font-size: 1.2rem;
+            padding: 20px 45px;
+            font-size: 1.4rem;
             font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 0 #1b5e20;
-        }
-
-        button:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #1b5e20; background-color: #388e3c; }
-        button:active { transform: translateY(2px); box-shadow: none; }
-
-        /* Juego */
-        #pregunta-texto { font-size: 1.5rem; margin: 30px 0; min-height: 80px; color: #222; }
-        .opcion {
-            background: white;
-            border: 2px solid #ddd;
-            width: 100%;
-            max-width: 450px;
-            margin: 10px 0;
-            padding: 15px;
             border-radius: 10px;
             cursor: pointer;
+            box-shadow: 0 6px 0 var(--verde-oscuro);
+            transition: 0.1s;
+        }
+
+        .btn-play:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--verde-oscuro); }
+
+        /* Estructura Juego */
+        .score-badge {
+            background: var(--verde-sm);
+            color: white;
+            padding: 8px 25px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        #quiz-box {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 550px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .opcion {
+            background: #fdfdfd;
+            border: 2px solid #eee;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
             font-size: 1.1rem;
             transition: 0.2s;
         }
-        .opcion:hover { background-color: #e8f5e9; border-color: var(--verde-institucional); }
 
-        /* Footer SM Fútbol */
-        .footer-institucional {
-            background: white;
+        .opcion:hover { border-color: var(--verde-sm); background: #f1f8f1; transform: scale(1.02); }
+
+        /* Footer Inicio */
+        footer {
+            background: var(--verde-sm);
+            color: white;
             padding: 25px;
-            border-top: 5px solid var(--verde-institucional);
-            color: #444;
-            font-size: 0.95rem;
-            line-height: 1.6;
+            width: 100%;
+            margin-top: auto;
+            border-top: 4px solid var(--dorado);
+            text-align: center;
         }
-        .footer-institucional strong { color: var(--verde-institucional); }
+
+        footer strong { color: var(--dorado); }
     </style>
 </head>
 <body>
 
-    <section id="inicio" class="pantalla activa">
+    <section id="pantalla-inicio" class="pantalla activa">
         <h1>Trivial Fútbol</h1>
-        
-        <div class="ranking-container">
-            <h3>🏆 RANKING HISTÓRICO</h3>
+        <div class="ranking-card">
+            <h3>🏆 RANKING SM FÚTBOL</h3>
             <table>
-                <thead>
-                    <tr>
-                        <th>POS</th>
-                        <th>ID</th>
-                        <th>PTS</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-body">
-                    </tbody>
+                <thead><tr><th>POS</th><th>ID</th><th>PTS</th></tr></thead>
+                <tbody id="lista-ranking"></tbody>
             </table>
         </div>
-
-        <button onclick="iniciar()">JUGAR AHORA</button>
-
-        <footer class="footer-institucional">
-            <p>Creado por <strong>SM Fútbol</strong></p>
+        <button class="btn-play" onclick="comenzar()">¡JUGAR!</button>
+        <footer>
+            <p>Creado por <strong>SM Fútbol 2026</strong></p>
             <p>📧 academiasmfutbol@outlook.es | 📞 625 468 296</p>
         </footer>
     </section>
 
-    <section id="juego" class="pantalla">
-        <div style="font-size: 1.2rem; font-weight: bold; color: var(--verde-institucional);">
-            Marcador: <span id="puntos">0</span>
+    <section id="pantalla-juego" class="pantalla">
+        <div class="score-badge">PUNTOS: <span id="pts-actual">0</span></div>
+        <div id="quiz-box">
+            <h2 id="pregunta-txt">...</h2>
+            <div id="opciones-grid"></div>
         </div>
-        <h2 id="pregunta-texto">Calentando...</h2>
-        <div id="opciones-box"></div>
     </section>
 
     <script>
-        let preguntas = [];
-        let pActual = 0;
+        let db = [];
+        let pIndex = 0;
         let score = 0;
 
-        // Carga de Datos
         async function cargar() {
-            try {
-                const res = await fetch('preguntas.json');
-                const data = await res.json();
-                // Filtramos solo las que tienen pregunta "q"
-                preguntas = data.filter(item => item.q).sort(() => Math.random() - 0.5);
-                verRanking();
-            } catch (e) { console.error("Error cargando preguntas"); }
+            const res = await fetch('preguntas.json');
+            const data = await res.json();
+            db = data.filter(i => i.q).sort(() => Math.random() - 0.5);
+            mostrarRanking();
         }
 
-        function iniciar() {
+        function comenzar() {
             score = 0;
-            pActual = 0;
-            document.getElementById('puntos').innerText = score;
-            cambiarPantalla('juego');
-            renderPregunta();
+            pIndex = 0;
+            document.getElementById('pts-actual').innerText = score;
+            navegar('pantalla-juego');
+            nuevaPregunta();
         }
 
-        function renderPregunta() {
-            if (pActual >= preguntas.length) {
-                finalizar();
-                return;
-            }
+        function nuevaPregunta() {
+            if (pIndex >= db.length) return finalizar("¡ERES UNA LEYENDA!");
 
-            const data = preguntas[pActual];
-            document.getElementById('pregunta-texto').innerText = data.q;
-            const box = document.getElementById('opciones-box');
-            box.innerHTML = "";
+            const p = db[pIndex];
+            document.getElementById('pregunta-txt').innerText = p.q;
+            const grid = document.getElementById('opciones-grid');
+            grid.innerHTML = "";
 
-            data.a.forEach((opc, i) => {
-                const div = document.createElement('div');
-                div.className = 'opcion';
-                div.innerText = opc;
-                div.onclick = () => {
-                    if (i === data.c) score += 10;
-                    document.getElementById('puntos').innerText = score;
-                    pActual++;
-                    renderPregunta();
+            p.a.forEach((txt, i) => {
+                const d = document.createElement('div');
+                d.className = 'opcion';
+                d.innerText = txt;
+                d.onclick = () => {
+                    if (i === p.c) {
+                        score += 10;
+                        document.getElementById('pts-actual').innerText = score;
+                        pIndex++;
+                        nuevaPregunta();
+                    } else {
+                        lanzarError();
+                    }
                 };
-                box.appendChild(div);
+                grid.appendChild(d);
             });
         }
 
-        function finalizar() {
-            let nick = prompt("¡FIN DEL JUEGO!\nPuntos totales: " + score + "\nIngresa tus iniciales (3 letras):");
-            if (nick) {
-                nick = nick.substring(0, 3).toUpperCase();
-                salvar(nick, score);
+        function lanzarError() {
+            // Efecto flash rojo
+            document.body.classList.add('error-flash');
+            setTimeout(() => {
+                document.body.classList.remove('error-flash');
+                finalizar("¡EXPULSADO! Respuesta incorrecta.");
+            }, 250);
+        }
+
+        function finalizar(msj) {
+            alert(msj);
+            let id = prompt("PUNTOS: " + score + "\nIntroduce tus iniciales (3 letras):");
+            if (id) {
+                let r = JSON.parse(localStorage.getItem('sm_ranking')) || [];
+                r.push({ id: id.substring(0, 3).toUpperCase(), score });
+                r.sort((a, b) => b.score - a.score);
+                localStorage.setItem('sm_ranking', JSON.stringify(r.slice(0, 5)));
             }
-            location.reload();
+            window.location.reload();
         }
 
-        // Lógica de Ranking
-        function salvar(id, pts) {
-            let r = JSON.parse(localStorage.getItem('sm_rank')) || [];
-            r.push({ id, pts });
-            r.sort((a, b) => b.pts - a.pts);
-            localStorage.setItem('sm_rank', JSON.stringify(r.slice(0, 5)));
-        }
-
-        function verRanking() {
-            const body = document.getElementById('tabla-body');
-            const r = JSON.parse(localStorage.getItem('sm_rank')) || [];
+        function mostrarRanking() {
+            const list = document.getElementById('lista-ranking');
+            const r = JSON.parse(localStorage.getItem('sm_ranking')) || [];
             if (r.length === 0) {
-                body.innerHTML = "<tr><td colspan='3'>SIN RÉCORDS</td></tr>";
+                list.innerHTML = "<tr><td colspan='3'>SIN DATOS</td></tr>";
                 return;
             }
-            body.innerHTML = r.map((jugador, i) => `
-                <tr>
-                    <td>${i + 1}</td>
-                    <td>${jugador.id}</td>
-                    <td>${jugador.pts}</td>
-                </tr>
+            list.innerHTML = r.map((j, i) => `
+                <tr><td class="pos">${i+1}</td><td>${j.id}</td><td>${j.score}</td></tr>
             `).join('');
         }
 
-        function cambiarPantalla(id) {
+        function navegar(id) {
             document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
             document.getElementById(id).classList.add('activa');
         }
