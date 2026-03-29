@@ -22,7 +22,6 @@
             transition: background-color 0.2s;
         }
 
-        /* Efecto Flash de Error */
         body.error-flash { background-color: var(--rojo-error) !important; }
 
         .pantalla { display: none; flex-direction: column; align-items: center; padding: 20px; flex: 1; animation: fadeIn 0.4s; }
@@ -30,9 +29,26 @@
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        h1 { color: var(--verde-sm); font-size: 2.8rem; margin: 15px 0; text-shadow: 1px 1px 3px rgba(0,0,0,0.1); }
+        h1 { color: var(--verde-sm); font-size: 2.8rem; margin: 15px 0; }
 
-        /* Ranking Arcade */
+        /* Timer Bar */
+        #timer-container {
+            width: 100%;
+            max-width: 550px;
+            height: 10px;
+            background: #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        #timer-bar {
+            width: 100%;
+            height: 100%;
+            background: var(--verde-sm);
+            transition: width 0.1s linear;
+        }
+
+        /* Ranking */
         .ranking-card {
             background: white;
             border-top: 6px solid var(--verde-sm);
@@ -45,11 +61,9 @@
         }
 
         table { width: 100%; border-collapse: collapse; font-family: 'Courier New', monospace; font-size: 1.3rem; }
-        th { font-size: 0.8rem; color: #999; border-bottom: 1px solid #eee; padding-bottom: 8px; }
-        td { padding: 10px 5px; border-bottom: 1px solid #f9f9f9; }
         .pos { color: var(--verde-sm); font-weight: bold; }
 
-        /* Botón Principal */
+        /* Botón Jugar */
         .btn-play {
             background: var(--verde-sm);
             color: white;
@@ -60,21 +74,9 @@
             border-radius: 10px;
             cursor: pointer;
             box-shadow: 0 6px 0 var(--verde-oscuro);
-            transition: 0.1s;
         }
 
-        .btn-play:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--verde-oscuro); }
-
-        /* Estructura Juego */
-        .score-badge {
-            background: var(--verde-sm);
-            color: white;
-            padding: 8px 25px;
-            border-radius: 20px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-
+        /* Quiz Box */
         #quiz-box {
             background: white;
             padding: 25px;
@@ -91,14 +93,10 @@
             padding: 15px;
             border-radius: 8px;
             cursor: pointer;
-            text-align: left;
             font-size: 1.1rem;
-            transition: 0.2s;
         }
+        .opcion:hover { border-color: var(--verde-sm); background: #f1f8f1; }
 
-        .opcion:hover { border-color: var(--verde-sm); background: #f1f8f1; transform: scale(1.02); }
-
-        /* Footer Inicio */
         footer {
             background: var(--verde-sm);
             color: white;
@@ -108,8 +106,6 @@
             border-top: 4px solid var(--dorado);
             text-align: center;
         }
-
-        footer strong { color: var(--dorado); }
     </style>
 </head>
 <body>
@@ -117,7 +113,7 @@
     <section id="pantalla-inicio" class="pantalla activa">
         <h1>Trivial Fútbol</h1>
         <div class="ranking-card">
-            <h3>🏆 RANKING SM FÚTBOL</h3>
+            <h3>🏆 TOP SM FÚTBOL</h3>
             <table>
                 <thead><tr><th>POS</th><th>ID</th><th>PTS</th></tr></thead>
                 <tbody id="lista-ranking"></tbody>
@@ -131,9 +127,14 @@
     </section>
 
     <section id="pantalla-juego" class="pantalla">
-        <div class="score-badge">PUNTOS: <span id="pts-actual">0</span></div>
+        <div style="font-weight: bold; margin-bottom: 10px;">PUNTOS: <span id="pts-actual">0</span></div>
+        
+        <div id="timer-container">
+            <div id="timer-bar"></div>
+        </div>
+
         <div id="quiz-box">
-            <h2 id="pregunta-txt">...</h2>
+            <h2 id="pregunta-txt">Cargando...</h2>
             <div id="opciones-grid"></div>
         </div>
     </section>
@@ -142,6 +143,8 @@
         let db = [];
         let pIndex = 0;
         let score = 0;
+        let tiempoRestante = 10;
+        let intervaloTimer;
 
         async function cargar() {
             const res = await fetch('preguntas.json');
@@ -159,6 +162,7 @@
         }
 
         function nuevaPregunta() {
+            clearInterval(intervaloTimer);
             if (pIndex >= db.length) return finalizar("¡ERES UNA LEYENDA!");
 
             const p = db[pIndex];
@@ -177,25 +181,47 @@
                         pIndex++;
                         nuevaPregunta();
                     } else {
-                        lanzarError();
+                        lanzarError("¡EXPULSADO! Respuesta incorrecta.");
                     }
                 };
                 grid.appendChild(d);
             });
+
+            iniciarTimer();
         }
 
-        function lanzarError() {
-            // Efecto flash rojo
+        function iniciarTimer() {
+            tiempoRestante = 10;
+            const bar = document.getElementById('timer-bar');
+            bar.style.width = "100%";
+            bar.style.backgroundColor = "var(--verde-sm)";
+
+            intervaloTimer = setInterval(() => {
+                tiempoRestante -= 0.1;
+                let porcentaje = (tiempoRestante / 10) * 10;
+                bar.style.width = (tiempoRestante * 10) + "%";
+
+                if (tiempoRestante <= 3) bar.style.backgroundColor = "var(--rojo-error)";
+
+                if (tiempoRestante <= 0) {
+                    clearInterval(intervaloTimer);
+                    lanzarError("¡TIEMPO AGOTADO!");
+                }
+            }, 100);
+        }
+
+        function lanzarError(msj) {
+            clearInterval(intervaloTimer);
             document.body.classList.add('error-flash');
             setTimeout(() => {
                 document.body.classList.remove('error-flash');
-                finalizar("¡EXPULSADO! Respuesta incorrecta.");
-            }, 250);
+                finalizar(msj);
+            }, 300);
         }
 
         function finalizar(msj) {
             alert(msj);
-            let id = prompt("PUNTOS: " + score + "\nIntroduce tus iniciales (3 letras):");
+            let id = prompt("PUNTOS: " + score + "\nIniciales (3 letras):");
             if (id) {
                 let r = JSON.parse(localStorage.getItem('sm_ranking')) || [];
                 r.push({ id: id.substring(0, 3).toUpperCase(), score });
@@ -208,13 +234,9 @@
         function mostrarRanking() {
             const list = document.getElementById('lista-ranking');
             const r = JSON.parse(localStorage.getItem('sm_ranking')) || [];
-            if (r.length === 0) {
-                list.innerHTML = "<tr><td colspan='3'>SIN DATOS</td></tr>";
-                return;
-            }
-            list.innerHTML = r.map((j, i) => `
+            list.innerHTML = r.length ? r.map((j, i) => `
                 <tr><td class="pos">${i+1}</td><td>${j.id}</td><td>${j.score}</td></tr>
-            `).join('');
+            `).join('') : "<tr><td colspan='3'>SIN RÉCORDS</td></tr>";
         }
 
         function navegar(id) {
