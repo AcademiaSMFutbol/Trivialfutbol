@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trivial Fútbol - 501 preguntas</title>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
+
     <style>
         :root {
             --verde-sm: #2E7D32;
@@ -29,26 +32,9 @@
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        h1 { color: var(--verde-sm); font-size: 2.8rem; margin: 15px 0; }
+        h1 { color: var(--verde-sm); font-size: 2.8rem; margin: 15px 0; text-shadow: 1px 1px 3px rgba(0,0,0,0.1); }
 
-        /* Timer Bar */
-        #timer-container {
-            width: 100%;
-            max-width: 550px;
-            height: 10px;
-            background: #ddd;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        #timer-bar {
-            width: 100%;
-            height: 100%;
-            background: var(--verde-sm);
-            transition: width 0.1s linear;
-        }
-
-        /* Ranking */
+        /* Ranking Card */
         .ranking-card {
             background: white;
             border-top: 6px solid var(--verde-sm);
@@ -61,7 +47,13 @@
         }
 
         table { width: 100%; border-collapse: collapse; font-family: 'Courier New', monospace; font-size: 1.3rem; }
+        th { font-size: 0.8rem; color: #999; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        td { padding: 10px 5px; border-bottom: 1px solid #f9f9f9; text-align: center; }
         .pos { color: var(--verde-sm); font-weight: bold; }
+
+        /* Timer Bar */
+        #timer-container { width: 100%; max-width: 550px; height: 10px; background: #ddd; border-radius: 5px; margin-bottom: 20px; overflow: hidden; }
+        #timer-bar { width: 100%; height: 100%; background: var(--verde-sm); transition: width 0.1s linear; }
 
         /* Botón Jugar */
         .btn-play {
@@ -74,7 +66,9 @@
             border-radius: 10px;
             cursor: pointer;
             box-shadow: 0 6px 0 var(--verde-oscuro);
+            transition: 0.1s;
         }
+        .btn-play:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--verde-oscuro); }
 
         /* Quiz Box */
         #quiz-box {
@@ -93,10 +87,13 @@
             padding: 15px;
             border-radius: 8px;
             cursor: pointer;
+            text-align: left;
             font-size: 1.1rem;
+            transition: 0.2s;
         }
-        .opcion:hover { border-color: var(--verde-sm); background: #f1f8f1; }
+        .opcion:hover { border-color: var(--verde-sm); background: #f1f8f1; transform: scale(1.02); }
 
+        /* Footer */
         footer {
             background: var(--verde-sm);
             color: white;
@@ -106,6 +103,7 @@
             border-top: 4px solid var(--dorado);
             text-align: center;
         }
+        footer strong { color: var(--dorado); }
     </style>
 </head>
 <body>
@@ -113,13 +111,13 @@
     <section id="pantalla-inicio" class="pantalla activa">
         <h1>Trivial Fútbol</h1>
         <div class="ranking-card">
-            <h3>🏆 TOP SM FÚTBOL</h3>
+            <h3>🏆 TOP 5 GLOBAL</h3>
             <table>
                 <thead><tr><th>POS</th><th>ID</th><th>PTS</th></tr></thead>
                 <tbody id="lista-ranking"></tbody>
             </table>
         </div>
-        <button class="btn-play" onclick="comenzar()">¡JUGAR!</button>
+        <button class="btn-play" onclick="comenzar()">¡SALTAR AL CAMPO!</button>
         <footer>
             <p>Creado por <strong>SM Fútbol 2026</strong></p>
             <p>📧 academiasmfutbol@outlook.es | 📞 625 468 296</p>
@@ -128,18 +126,29 @@
 
     <section id="pantalla-juego" class="pantalla">
         <div style="font-weight: bold; margin-bottom: 10px;">PUNTOS: <span id="pts-actual">0</span></div>
-        
-        <div id="timer-container">
-            <div id="timer-bar"></div>
-        </div>
-
+        <div id="timer-container"><div id="timer-bar"></div></div>
         <div id="quiz-box">
-            <h2 id="pregunta-txt">Cargando...</h2>
+            <h2 id="pregunta-txt">...</h2>
             <div id="opciones-grid"></div>
         </div>
     </section>
 
     <script>
+        // DATOS EXTRAÍDOS DE TU IMAGEN
+        const firebaseConfig = {
+            apiKey: "AIzaSyDbIz9-3lb5z-G0ywfUDZY2t4mZg-d9Ej0",
+            authDomain: "trivialfutbol-79a99.firebaseapp.com",
+            databaseURL: "https://trivialfutbol-79a99-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "trivialfutbol-79a99",
+            storageBucket: "trivialfutbol-79a99.firebasestorage.app",
+            messagingSenderId: "864785036144",
+            appId: "1:864785036144:web:21a56e580f87bca6b995b5",
+            measurementId: "G-QHJX5LF4KW"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         let db = [];
         let pIndex = 0;
         let score = 0;
@@ -150,12 +159,11 @@
             const res = await fetch('preguntas.json');
             const data = await res.json();
             db = data.filter(i => i.q).sort(() => Math.random() - 0.5);
-            mostrarRanking();
+            escucharRankingGlobal();
         }
 
         function comenzar() {
-            score = 0;
-            pIndex = 0;
+            score = 0; pIndex = 0;
             document.getElementById('pts-actual').innerText = score;
             navegar('pantalla-juego');
             nuevaPregunta();
@@ -163,7 +171,7 @@
 
         function nuevaPregunta() {
             clearInterval(intervaloTimer);
-            if (pIndex >= db.length) return finalizar("¡ERES UNA LEYENDA!");
+            if (pIndex >= db.length) return finalizar("¡CAMPEÓN DEL MUNDO!");
 
             const p = db[pIndex];
             document.getElementById('pregunta-txt').innerText = p.q;
@@ -181,12 +189,11 @@
                         pIndex++;
                         nuevaPregunta();
                     } else {
-                        lanzarError("¡EXPULSADO! Respuesta incorrecta.");
+                        lanzarError("¡RESPUESTA INCORRECTA!");
                     }
                 };
                 grid.appendChild(d);
             });
-
             iniciarTimer();
         }
 
@@ -198,15 +205,9 @@
 
             intervaloTimer = setInterval(() => {
                 tiempoRestante -= 0.1;
-                let porcentaje = (tiempoRestante / 10) * 10;
                 bar.style.width = (tiempoRestante * 10) + "%";
-
                 if (tiempoRestante <= 3) bar.style.backgroundColor = "var(--rojo-error)";
-
-                if (tiempoRestante <= 0) {
-                    clearInterval(intervaloTimer);
-                    lanzarError("¡TIEMPO AGOTADO!");
-                }
+                if (tiempoRestante <= 0) { clearInterval(intervaloTimer); lanzarError("¡TIEMPO AGOTADO!"); }
             }, 100);
         }
 
@@ -223,20 +224,22 @@
             alert(msj);
             let id = prompt("PUNTOS: " + score + "\nIniciales (3 letras):");
             if (id) {
-                let r = JSON.parse(localStorage.getItem('sm_ranking')) || [];
-                r.push({ id: id.substring(0, 3).toUpperCase(), score });
-                r.sort((a, b) => b.score - a.score);
-                localStorage.setItem('sm_ranking', JSON.stringify(r.slice(0, 5)));
+                const nick = id.substring(0, 3).toUpperCase();
+                database.ref('ranking').push({ id: nick, score: score });
             }
             window.location.reload();
         }
 
-        function mostrarRanking() {
+        function escucharRankingGlobal() {
             const list = document.getElementById('lista-ranking');
-            const r = JSON.parse(localStorage.getItem('sm_ranking')) || [];
-            list.innerHTML = r.length ? r.map((j, i) => `
-                <tr><td class="pos">${i+1}</td><td>${j.id}</td><td>${j.score}</td></tr>
-            `).join('') : "<tr><td colspan='3'>SIN RÉCORDS</td></tr>";
+            database.ref('ranking').orderByChild('score').limitToLast(5).on('value', (snapshot) => {
+                let data = [];
+                snapshot.forEach(child => { data.push(child.val()); });
+                data.sort((a, b) => b.score - a.score);
+                list.innerHTML = data.map((j, i) => `
+                    <tr><td class="pos">${i+1}</td><td>${j.id}</td><td>${j.score}</td></tr>
+                `).join('');
+            });
         }
 
         function navegar(id) {
