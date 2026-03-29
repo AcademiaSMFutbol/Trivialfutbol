@@ -3,197 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trivial Fútbol - 501 Preguntas</title>
+    <title>Trivial Fútbol - 501 preguntas </title>
     <style>
         :root {
-            --bg: #0f172a; --card: #1e293b; --gold: #fbce07; --white: #f8fafc;
-            --n1: #22c55e; --n2: #f97316; --n3: #ef4444;
+            --verde-institucional: #2E7D32;
+            --dorado: #FFD700;
+            --gris-claro: #F5F5F5;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--white); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow: hidden; }
-        #game-container { background: var(--card); width: 95%; max-width: 650px; padding: 2.5rem; border-radius: 2rem; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); }
-        
-        /* Pantallas */
-        .menu-title { font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--gold); text-transform: uppercase; letter-spacing: 2px; }
-        .level-select { display: grid; gap: 15px; margin-top: 2rem; }
-        .btn-lvl { padding: 20px; border-radius: 15px; border: none; cursor: pointer; font-size: 1.2rem; font-weight: bold; transition: 0.3s; color: #000; }
-        .btn-lvl:hover { transform: scale(1.03); filter: brightness(1.1); }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: var(--gris-claro);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            text-align: center;
+        }
+
+        .pantalla { display: none; flex-direction: column; align-items: center; padding: 20px; flex: 1; }
+        .activa { display: flex; }
+
+        h1 { color: var(--verde-institucional); font-size: 2.8rem; margin-bottom: 10px; }
+
+        /* Estilo Ranking Arcade */
+        .ranking-container {
+            background: white;
+            border: 4px solid var(--verde-institucional);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .ranking-container h3 { margin-top: 0; color: var(--verde-institucional); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        th { border-bottom: 3px solid var(--verde-institucional); padding-bottom: 10px; }
+        td { padding: 12px 5px; color: #333; }
+
+        /* Botones */
+        button {
+            background-color: var(--verde-institucional);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 #1b5e20;
+        }
+
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #1b5e20; background-color: #388e3c; }
+        button:active { transform: translateY(2px); box-shadow: none; }
 
         /* Juego */
-        .bar-container { width: 100%; height: 12px; background: #334155; border-radius: 6px; margin: 20px 0; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
-        #timer-bar { width: 100%; height: 100%; background: var(--gold); transition: width 0.1s linear; }
-        .q-text { font-size: 1.6rem; font-weight: bold; margin-bottom: 2rem; min-height: 5rem; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
-        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        @media (max-width: 480px) { .options { grid-template-columns: 1fr; } }
-        
-        button.btn-opt { display: block; width: 100%; padding: 18px; background: rgba(255,255,255,0.05); border: 1px solid #475569; color: white; border-radius: 12px; cursor: pointer; font-size: 1.1rem; transition: 0.2s; font-family: inherit; }
-        button.btn-opt:hover:not(:disabled) { background: rgba(255,255,255,0.12); border-color: var(--gold); }
-        
-        .correct { background: var(--n1) !important; color: #052e16 !important; font-weight: bold; border-color: var(--n1) !important; }
-        .wrong { background: var(--n3) !important; border-color: var(--n3) !important; }
-        
-        #stats { margin-top: 25px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #334155; padding-top: 15px; font-size: 0.9rem; }
-        .btn-home { background: none; border: 1px solid var(--gold); color: var(--gold); padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        
-        .hidden { display: none; }
-        #loading-msg { color: var(--gold); font-weight: bold; }
+        #pregunta-texto { font-size: 1.5rem; margin: 30px 0; min-height: 80px; color: #222; }
+        .opcion {
+            background: white;
+            border: 2px solid #ddd;
+            width: 100%;
+            max-width: 450px;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: 0.2s;
+        }
+        .opcion:hover { background-color: #e8f5e9; border-color: var(--verde-institucional); }
+
+        /* Footer SM Fútbol */
+        .footer-institucional {
+            background: white;
+            padding: 25px;
+            border-top: 5px solid var(--verde-institucional);
+            color: #444;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .footer-institucional strong { color: var(--verde-institucional); }
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    <div id="screen-loading">
-        <h2 id="loading-msg">⚽ CONECTANDO CON EL VESTUARIO...</h2>
-    </div>
-
-    <div id="screen-start" class="hidden">
-        <h1 class="menu-title">TRIVIAL FÚTBOL</h1>
-        <p id="total-info" style="opacity: 0.7; font-size: 0.9rem;"></p>
-        <div class="level-select">
-            <button class="btn-lvl" style="background: var(--n1);" onclick="startGame(1)">🌱 CANTERA</button>
-            <button class="btn-lvl" style="background: var(--n2);" onclick="startGame(2)">🏆 PROFESIONAL</button>
-            <button class="btn-lvl" style="background: var(--n3); color: white;" onclick="startGame(3)">🔥 ÉLITE MUNDIAL</button>
+    <section id="inicio" class="pantalla activa">
+        <h1>Trivial Fútbol</h1>
+        
+        <div class="ranking-container">
+            <h3>🏆 RANKING HISTÓRICO</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>POS</th>
+                        <th>ID</th>
+                        <th>PTS</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-body">
+                    </tbody>
+            </table>
         </div>
-    </div>
 
-    <div id="screen-game" class="hidden">
-        <div id="lvl-display" style="font-weight: bold; color: var(--gold); font-size: 0.8rem; letter-spacing: 2px;"></div>
-        <div class="bar-container"><div id="timer-bar"></div></div>
-        <div id="status" style="height: 1.2rem; margin-bottom: 10px; font-size: 0.9rem; font-weight: bold; color: var(--gold);"></div>
-        <div class="q-text" id="q-text"></div>
-        <div class="options" id="options"></div>
-        <div id="stats">
-            <span>Goles: <b id="score">0</b> ⚽</span>
-            <span id="remaining" style="opacity: 0.6;"></span>
-            <button class="btn-home" onclick="location.reload()">🏠 INICIO</button>
+        <button onclick="iniciar()">JUGAR AHORA</button>
+
+        <footer class="footer-institucional">
+            <p>Creado por <strong>SM Fútbol</strong></p>
+            <p>📧 academiasmfutbol@outlook.es | 📞 625 468 296</p>
+        </footer>
+    </section>
+
+    <section id="juego" class="pantalla">
+        <div style="font-size: 1.2rem; font-weight: bold; color: var(--verde-institucional);">
+            Marcador: <span id="puntos">0</span>
         </div>
-    </div>
-</div>
+        <h2 id="pregunta-texto">Calentando...</h2>
+        <div id="opciones-box"></div>
+    </section>
 
-<script>
-    let rawDB = []; 
-    let activeDeck = []; 
-    let score = 0;
-    let timer;
-    let selectedLvl = 1;
+    <script>
+        let preguntas = [];
+        let pActual = 0;
+        let score = 0;
 
-    const READ_TIME = 2000; // 2 segundos para leer
-    const ACTION_TIME = 5000; // 5 segundos para responder
-
-    // CARGA FORZADA (ANTI-CACHÉ)
-    async function init() {
-        try {
-            // El 'v=' con tiempo actual obliga a GitHub a dar el archivo real, no el guardado
-            const response = await fetch('preguntas.json?v=' + new Date().getTime());
-            if (!response.ok) throw new Error();
-            
-            rawDB = await response.json();
-            
-            document.getElementById('screen-loading').classList.add('hidden');
-            document.getElementById('screen-start').classList.remove('hidden');
-            document.getElementById('total-info').innerText = `Base de datos cargada: ${rawDB.length} preguntas disponibles.`;
-        } catch (e) {
-            document.getElementById('loading-msg').innerHTML = 
-                `<span style="color:var(--n3)">⚠️ ERROR AL CARGAR PREGUNTAS.JSON</span><br>
-                 <small style="color:white; font-weight:normal">Revisa que el archivo esté en la raíz de tu GitHub.</small>`;
-        }
-    }
-
-    function startGame(lvl) {
-        selectedLvl = lvl;
-        score = 0;
-        
-        // Filtrar y barajar el mazo (Mazo por descarte)
-        activeDeck = rawDB.filter(q => parseInt(q.d) === lvl);
-        activeDeck.sort(() => Math.random() - 0.5);
-        
-        if(activeDeck.length === 0) {
-            alert("No hay preguntas para este nivel en el archivo JSON.");
-            return;
+        // Carga de Datos
+        async function cargar() {
+            try {
+                const res = await fetch('preguntas.json');
+                const data = await res.json();
+                // Filtramos solo las que tienen pregunta "q"
+                preguntas = data.filter(item => item.q).sort(() => Math.random() - 0.5);
+                verRanking();
+            } catch (e) { console.error("Error cargando preguntas"); }
         }
 
-        document.getElementById('screen-start').classList.add('hidden');
-        document.getElementById('screen-game').classList.remove('hidden');
-        document.getElementById('lvl-display').innerText = lvl==1 ? "MODO: CANTERA" : lvl==2 ? "MODO: PROFESIONAL" : "MODO: ÉLITE";
-        
-        renderQuestion();
-    }
-
-    function renderQuestion() {
-        // Si el mazo se acaba, avisamos
-        if(activeDeck.length === 0) {
-            document.getElementById('q-text').innerText = "¡Has completado todas las preguntas de este nivel! Vuelve al inicio para probar otro.";
-            document.getElementById('options').innerHTML = '';
-            document.getElementById('remaining').innerText = "Fin del mazo";
-            return;
+        function iniciar() {
+            score = 0;
+            pActual = 0;
+            document.getElementById('puntos').innerText = score;
+            cambiarPantalla('juego');
+            renderPregunta();
         }
 
-        // Sacamos la última pregunta (imposible repetir en la sesión)
-        const data = activeDeck.pop();
-        
-        document.getElementById('q-text').innerText = data.q;
-        document.getElementById('remaining').innerText = `Restantes: ${activeDeck.length}`;
-        document.getElementById('score').innerText = score;
-        
-        const opts = document.getElementById('options');
-        opts.innerHTML = '';
-        data.a.forEach((opt, i) => {
-            const b = document.createElement('button');
-            b.className = 'btn-opt';
-            b.innerText = opt;
-            b.onclick = () => check(i, data.c, b, data);
-            opts.appendChild(b);
-        });
-
-        // Configuración de tiempos
-        const bar = document.getElementById('timer-bar');
-        const status = document.getElementById('status');
-        bar.style.width = '100%';
-        bar.style.background = '#475569';
-        status.innerText = "⚽ Analizando jugada... (Lee)";
-
-        setTimeout(() => {
-            // Verificar que seguimos en la pantalla de juego
-            if(!document.getElementById('screen-game').classList.contains('hidden')) {
-                status.innerText = "🔥 ¡DECIDE EL PASE!";
-                bar.style.background = "var(--gold)";
-                startTimer(data);
+        function renderPregunta() {
+            if (pActual >= preguntas.length) {
+                finalizar();
+                return;
             }
-        }, READ_TIME);
-    }
 
-    function startTimer(currentData) {
-        let start = Date.now();
-        clearInterval(timer);
-        timer = setInterval(() => {
-            let elapsed = Date.now() - start;
-            let per = 100 - (elapsed / ACTION_TIME * 100);
-            document.getElementById('timer-bar').style.width = per + '%';
-            if(per <= 0) { 
-                clearInterval(timer); 
-                check(-1, currentData.c, null, currentData); 
-            }
-        }, 50);
-    }
+            const data = preguntas[pActual];
+            document.getElementById('pregunta-texto').innerText = data.q;
+            const box = document.getElementById('opciones-box');
+            box.innerHTML = "";
 
-    function check(sel, cor, btn, data) {
-        clearInterval(timer);
-        const btns = document.querySelectorAll('.btn-opt');
-        btns.forEach(b => b.disabled = true);
-
-        if(sel === cor) {
-            if(btn) btn.classList.add('correct');
-            score++;
-        } else {
-            if(btn) btn.classList.add('wrong');
-            if(btns[cor]) btns[cor].classList.add('correct');
-            if(sel === -1) document.getElementById('status').innerText = "⌛ ¡TIEMPO AGOTADO!";
+            data.a.forEach((opc, i) => {
+                const div = document.createElement('div');
+                div.className = 'opcion';
+                div.innerText = opc;
+                div.onclick = () => {
+                    if (i === data.c) score += 10;
+                    document.getElementById('puntos').innerText = score;
+                    pActual++;
+                    renderPregunta();
+                };
+                box.appendChild(div);
+            });
         }
 
-        document.getElementById('score').innerText = score;
-        setTimeout(renderQuestion, 2000);
-    }
+        function finalizar() {
+            let nick = prompt("¡FIN DEL JUEGO!\nPuntos totales: " + score + "\nIngresa tus iniciales (3 letras):");
+            if (nick) {
+                nick = nick.substring(0, 3).toUpperCase();
+                salvar(nick, score);
+            }
+            location.reload();
+        }
 
-    init();
-</script>
+        // Lógica de Ranking
+        function salvar(id, pts) {
+            let r = JSON.parse(localStorage.getItem('sm_rank')) || [];
+            r.push({ id, pts });
+            r.sort((a, b) => b.pts - a.pts);
+            localStorage.setItem('sm_rank', JSON.stringify(r.slice(0, 5)));
+        }
+
+        function verRanking() {
+            const body = document.getElementById('tabla-body');
+            const r = JSON.parse(localStorage.getItem('sm_rank')) || [];
+            if (r.length === 0) {
+                body.innerHTML = "<tr><td colspan='3'>SIN RÉCORDS</td></tr>";
+                return;
+            }
+            body.innerHTML = r.map((jugador, i) => `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${jugador.id}</td>
+                    <td>${jugador.pts}</td>
+                </tr>
+            `).join('');
+        }
+
+        function cambiarPantalla(id) {
+            document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+            document.getElementById(id).classList.add('activa');
+        }
+
+        window.onload = cargar;
+    </script>
 </body>
 </html>
