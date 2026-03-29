@@ -3,54 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fútbol Máster - Anti-Repetición</title>
+    <title>Fútbol Máster Pro - 1000 Preguntas</title>
     <style>
         :root {
             --bg: #0f172a; --card: #1e293b; --gold: #fbce07; --white: #f8fafc;
             --n1: #22c55e; --n2: #f97316; --n3: #ef4444;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--white); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--white); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow: hidden; }
         #game-container { background: var(--card); width: 95%; max-width: 650px; padding: 2.5rem; border-radius: 2rem; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); }
-        .menu-title { font-size: 2.5rem; margin-bottom: 2rem; color: var(--gold); }
-        .level-select { display: grid; gap: 15px; }
+        
+        /* Pantallas */
+        .menu-title { font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--gold); text-transform: uppercase; letter-spacing: 2px; }
+        .level-select { display: grid; gap: 15px; margin-top: 2rem; }
         .btn-lvl { padding: 20px; border-radius: 15px; border: none; cursor: pointer; font-size: 1.2rem; font-weight: bold; transition: 0.3s; color: #000; }
-        .bar-container { width: 100%; height: 10px; background: #334155; border-radius: 5px; margin: 20px 0; overflow: hidden; }
+        .btn-lvl:hover { transform: scale(1.03); filter: brightness(1.1); }
+
+        /* Juego */
+        .bar-container { width: 100%; height: 12px; background: #334155; border-radius: 6px; margin: 20px 0; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
         #timer-bar { width: 100%; height: 100%; background: var(--gold); transition: width 0.1s linear; }
-        .q-text { font-size: 1.5rem; font-weight: bold; margin-bottom: 2rem; min-height: 5rem; display: flex; align-items: center; justify-content: center; }
+        .q-text { font-size: 1.6rem; font-weight: bold; margin-bottom: 2rem; min-height: 5rem; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
         .options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         @media (max-width: 480px) { .options { grid-template-columns: 1fr; } }
-        button.btn-opt { display: block; width: 100%; padding: 16px; background: rgba(255,255,255,0.05); border: 1px solid #475569; color: white; border-radius: 12px; cursor: pointer; font-size: 1.1rem; }
-        .correct { background: var(--n1) !important; color: #052e16 !important; font-weight: bold; }
-        .wrong { background: var(--n3) !important; }
-        #stats { margin-top: 25px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #334155; padding-top: 15px; }
+        
+        button.btn-opt { display: block; width: 100%; padding: 18px; background: rgba(255,255,255,0.05); border: 1px solid #475569; color: white; border-radius: 12px; cursor: pointer; font-size: 1.1rem; transition: 0.2s; font-family: inherit; }
+        button.btn-opt:hover:not(:disabled) { background: rgba(255,255,255,0.12); border-color: var(--gold); }
+        
+        .correct { background: var(--n1) !important; color: #052e16 !important; font-weight: bold; border-color: var(--n1) !important; }
+        .wrong { background: var(--n3) !important; border-color: var(--n3) !important; }
+        
+        #stats { margin-top: 25px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #334155; padding-top: 15px; font-size: 0.9rem; }
+        .btn-home { background: none; border: 1px solid var(--gold); color: var(--gold); padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        
         .hidden { display: none; }
+        #loading-msg { color: var(--gold); font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div id="screen-loading"><h2>⚽ Cargando mazo de preguntas...</h2></div>
+    <div id="screen-loading">
+        <h2 id="loading-msg">⚽ CONECTANDO CON EL VESTUARIO...</h2>
+    </div>
 
     <div id="screen-start" class="hidden">
         <h1 class="menu-title">FÚTBOL MÁSTER</h1>
+        <p id="total-info" style="opacity: 0.7; font-size: 0.9rem;"></p>
         <div class="level-select">
             <button class="btn-lvl" style="background: var(--n1);" onclick="startGame(1)">🌱 CANTERA</button>
             <button class="btn-lvl" style="background: var(--n2);" onclick="startGame(2)">🏆 PROFESIONAL</button>
             <button class="btn-lvl" style="background: var(--n3); color: white;" onclick="startGame(3)">🔥 ÉLITE MUNDIAL</button>
         </div>
-        <p id="total-info" style="margin-top:20px; font-size:0.8rem; opacity:0.6;"></p>
     </div>
 
     <div id="screen-game" class="hidden">
-        <div id="lvl-display" style="font-weight: bold; color: var(--gold); letter-spacing: 2px; font-size: 0.8rem;"></div>
+        <div id="lvl-display" style="font-weight: bold; color: var(--gold); font-size: 0.8rem; letter-spacing: 2px;"></div>
         <div class="bar-container"><div id="timer-bar"></div></div>
         <div id="status" style="height: 1.2rem; margin-bottom: 10px; font-size: 0.9rem; font-weight: bold; color: var(--gold);"></div>
         <div class="q-text" id="q-text"></div>
         <div class="options" id="options"></div>
         <div id="stats">
             <span>Goles: <b id="score">0</b> ⚽</span>
-            <span id="remaining" style="font-size: 0.8rem; opacity: 0.6;"></span>
-            <button onclick="location.reload()" style="background:none; border:1px solid var(--gold); color:var(--gold); cursor:pointer; padding:5px 10px; border-radius:5px;">🏠 Salir</button>
+            <span id="remaining" style="opacity: 0.6;"></span>
+            <button class="btn-home" onclick="location.reload()">🏠 INICIO</button>
         </div>
     </div>
 </div>
@@ -58,51 +72,63 @@
 <script>
     let rawDB = []; 
     let activeDeck = []; 
-    let globalUsedHashes = new Set(); // Para asegurar que no se repitan nunca
     let score = 0;
     let timer;
-    let currentLvl = 1;
+    let selectedLvl = 1;
 
-    // 1. CARGA EL JSON (Añadimos un parámetro random para evitar que el navegador use la versión vieja)
+    const READ_TIME = 3000; // 3 segundos para leer
+    const ACTION_TIME = 8000; // 8 segundos para responder
+
+    // CARGA FORZADA (ANTI-CACHÉ)
     async function init() {
         try {
-            const response = await fetch('preguntas.json?v=' + Math.random());
+            // El 'v=' con tiempo actual obliga a GitHub a dar el archivo real, no el guardado
+            const response = await fetch('preguntas.json?v=' + new Date().getTime());
+            if (!response.ok) throw new Error();
+            
             rawDB = await response.json();
+            
             document.getElementById('screen-loading').classList.add('hidden');
             document.getElementById('screen-start').classList.remove('hidden');
-            document.getElementById('total-info').innerText = `Base de datos: ${rawDB.length} preguntas detectadas.`;
+            document.getElementById('total-info').innerText = `Base de datos cargada: ${rawDB.length} preguntas disponibles.`;
         } catch (e) {
-            document.getElementById('screen-loading').innerHTML = "<h2 style='color:red'>Error cargando preguntas.json</h2>";
+            document.getElementById('loading-msg').innerHTML = 
+                `<span style="color:var(--n3)">⚠️ ERROR AL CARGAR PREGUNTAS.JSON</span><br>
+                 <small style="color:white; font-weight:normal">Revisa que el archivo esté en la raíz de tu GitHub.</small>`;
         }
     }
 
     function startGame(lvl) {
-        currentLvl = lvl;
+        selectedLvl = lvl;
         score = 0;
-        // Filtramos y barajamos el mazo al empezar
+        
+        // Filtrar y barajar el mazo (Mazo por descarte)
         activeDeck = rawDB.filter(q => parseInt(q.d) === lvl);
         activeDeck.sort(() => Math.random() - 0.5);
         
         if(activeDeck.length === 0) {
-            alert("No hay preguntas para este nivel en el JSON.");
+            alert("No hay preguntas para este nivel en el archivo JSON.");
             return;
         }
 
         document.getElementById('screen-start').classList.add('hidden');
         document.getElementById('screen-game').classList.remove('hidden');
-        document.getElementById('lvl-display').innerText = lvl==1 ? "CANTERA" : lvl==2 ? "PROFESIONAL" : "ÉLITE";
+        document.getElementById('lvl-display').innerText = lvl==1 ? "MODO: CANTERA" : lvl==2 ? "MODO: PROFESIONAL" : "MODO: ÉLITE";
+        
         renderQuestion();
     }
 
     function renderQuestion() {
-        // Si el mazo se acaba, avisamos o reiniciamos
+        // Si el mazo se acaba, avisamos
         if(activeDeck.length === 0) {
-            document.getElementById('q-text').innerText = "¡Has completado todas las preguntas de este nivel!";
-            document.getElementById('options').innerHTML = '<button class="btn-lvl" style="background:var(--gold); width:100%" onclick="location.reload()">Volver al Inicio</button>';
+            document.getElementById('q-text').innerText = "¡Has completado todas las preguntas de este nivel! Vuelve al inicio para probar otro.";
+            document.getElementById('options').innerHTML = '';
+            document.getElementById('remaining').innerText = "Fin del mazo";
             return;
         }
 
-        const data = activeDeck.pop(); // Sacamos la última (imposible repetir en esta sesión)
+        // Sacamos la última pregunta (imposible repetir en la sesión)
+        const data = activeDeck.pop();
         
         document.getElementById('q-text').innerText = data.q;
         document.getElementById('remaining').innerText = `Restantes: ${activeDeck.length}`;
@@ -114,34 +140,42 @@
             const b = document.createElement('button');
             b.className = 'btn-opt';
             b.innerText = opt;
-            b.onclick = () => checkAnswer(i, data.c, b, data);
+            b.onclick = () => check(i, data.c, b, data);
             opts.appendChild(b);
         });
 
-        // Temporizador
-        resetTimer(data);
-    }
-
-    function resetTimer(data) {
-        clearInterval(timer);
+        // Configuración de tiempos
         const bar = document.getElementById('timer-bar');
         const status = document.getElementById('status');
         bar.style.width = '100%';
-        status.innerText = "⚽ Lee la jugada...";
-        
+        bar.style.background = '#475569';
+        status.innerText = "⚽ Analizando jugada... (Lee)";
+
         setTimeout(() => {
-            status.innerText = "🔥 ¡DISPARA!";
-            let start = Date.now();
-            timer = setInterval(() => {
-                let diff = Date.now() - start;
-                let per = 100 - (diff / 8000 * 100);
-                bar.style.width = per + '%';
-                if(per <= 0) { clearInterval(timer); checkAnswer(-1, data.c, null, data); }
-            }, 50);
-        }, 3000);
+            // Verificar que seguimos en la pantalla de juego
+            if(!document.getElementById('screen-game').classList.contains('hidden')) {
+                status.innerText = "🔥 ¡DECIDE EL PASE!";
+                bar.style.background = "var(--gold)";
+                startTimer(data);
+            }
+        }, READ_TIME);
     }
 
-    function checkAnswer(sel, cor, btn, data) {
+    function startTimer(currentData) {
+        let start = Date.now();
+        clearInterval(timer);
+        timer = setInterval(() => {
+            let elapsed = Date.now() - start;
+            let per = 100 - (elapsed / ACTION_TIME * 100);
+            document.getElementById('timer-bar').style.width = per + '%';
+            if(per <= 0) { 
+                clearInterval(timer); 
+                check(-1, currentData.c, null, currentData); 
+            }
+        }, 50);
+    }
+
+    function check(sel, cor, btn, data) {
         clearInterval(timer);
         const btns = document.querySelectorAll('.btn-opt');
         btns.forEach(b => b.disabled = true);
@@ -152,7 +186,10 @@
         } else {
             if(btn) btn.classList.add('wrong');
             if(btns[cor]) btns[cor].classList.add('correct');
+            if(sel === -1) document.getElementById('status').innerText = "⌛ ¡TIEMPO AGOTADO!";
         }
+
+        document.getElementById('score').innerText = score;
         setTimeout(renderQuestion, 2000);
     }
 
