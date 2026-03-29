@@ -3,130 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trivia Fútbol Máster 1000</title>
+    <title>Fútbol Máster: Selección de Nivel</title>
     <style>
         :root {
             --bg: #0f172a; --card: #1e293b; --gold: #fbce07; --white: #f8fafc;
             --n1: #22c55e; --n2: #f97316; --n3: #ef4444;
         }
-        body { font-family: sans-serif; background: var(--bg); color: var(--white); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        #game-container { background: var(--card); width: 95%; max-width: 650px; padding: 2rem; border-radius: 1.5rem; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--white); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        #game-container { background: var(--card); width: 95%; max-width: 650px; padding: 2.5rem; border-radius: 2rem; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); }
+        
+        /* Pantalla de Inicio */
+        .menu-title { font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--gold); }
+        .menu-subtitle { opacity: 0.8; margin-bottom: 2.5rem; }
+        .level-select { display: grid; gap: 15px; }
+        .btn-lvl { padding: 20px; border-radius: 15px; border: none; cursor: pointer; font-size: 1.2rem; font-weight: bold; transition: 0.3s; color: #000; }
+        .btn-lvl:hover { transform: scale(1.03); filter: brightness(1.1); }
+
+        /* Juego */
         .bar-container { width: 100%; height: 10px; background: #334155; border-radius: 5px; margin: 20px 0; overflow: hidden; }
         #timer-bar { width: 100%; height: 100%; background: var(--gold); transition: width 0.1s linear; }
-        #lvl-tag { display: inline-block; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; background: var(--gold); color: #000; text-transform: uppercase; margin-bottom: 10px; }
-        .q-text { font-size: 1.6rem; font-weight: bold; margin-bottom: 2rem; min-height: 5rem; line-height: 1.2; }
+        .q-text { font-size: 1.6rem; font-weight: bold; margin-bottom: 2rem; min-height: 5rem; }
         .options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         @media (max-width: 480px) { .options { grid-template-columns: 1fr; } }
-        button.btn { display: block; width: 100%; padding: 16px; background: rgba(255,255,255,0.05); border: 1px solid #475569; color: white; border-radius: 12px; cursor: pointer; font-size: 1.1rem; transition: 0.2s; }
-        button.btn:hover:not(:disabled) { background: rgba(255,255,255,0.12); border-color: var(--gold); transform: translateY(-2px); }
-        .correct { background: var(--n1) !important; color: #052e16 !important; font-weight: bold; border-color: var(--n1) !important; }
-        .wrong { background: var(--n3) !important; border-color: var(--n3) !important; }
-        #stats { margin-top: 25px; font-size: 1rem; opacity: 0.8; display: flex; justify-content: space-between; border-top: 1px solid #334155; padding-top: 15px; }
+        
+        button.btn-opt { display: block; width: 100%; padding: 16px; background: rgba(255,255,255,0.05); border: 1px solid #475569; color: white; border-radius: 12px; cursor: pointer; font-size: 1.1rem; transition: 0.2s; }
+        button.btn-opt:hover:not(:disabled) { background: rgba(255,255,255,0.12); border-color: var(--gold); }
+        
+        .correct { background: var(--n1) !important; color: #052e16 !important; font-weight: bold; }
+        .wrong { background: var(--n3) !important; }
+        
+        #stats { margin-top: 25px; display: flex; justify-content: space-between; border-top: 1px solid #334155; padding-top: 15px; }
+        .btn-home { background: none; border: 1px solid var(--gold); color: var(--gold); padding: 5px 15px; border-radius: 10px; cursor: pointer; margin-top: 20px; }
+        
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div id="quiz">
-        <span id="lvl-tag">CARGANDO...</span>
+    <div id="screen-start">
+        <h1 class="menu-title">FÚTBOL MÁSTER</h1>
+        <p class="menu-subtitle">Selecciona tu nivel de dificultad</p>
+        <div class="level-select">
+            <button class="btn-lvl" style="background: var(--n1);" onclick="startGame(1)">🌱 CANTERA (Fácil)</button>
+            <button class="btn-lvl" style="background: var(--n2);" onclick="startGame(2)">🏆 PROFESIONAL (Medio)</button>
+            <button class="btn-lvl" style="background: var(--n3); color: white;" onclick="startGame(3)">🔥 ÉLITE MUNDIAL (Difícil)</button>
+        </div>
+    </div>
+
+    <div id="screen-game" class="hidden">
+        <div id="lvl-display" style="font-weight: bold; color: var(--gold); margin-bottom: 10px; letter-spacing: 1px;"></div>
         <div class="bar-container"><div id="timer-bar"></div></div>
-        <div id="status" style="color: var(--gold); font-weight: bold; height: 1.2rem; margin-bottom: 10px; font-size: 0.9rem;"></div>
-        <div class="q-text" id="q-text">Preparando el campo de juego...</div>
+        <div id="status" style="height: 1.2rem; margin-bottom: 10px; font-size: 0.9rem; font-weight: bold; color: var(--gold);"></div>
+        <div class="q-text" id="q-text">Cargando...</div>
         <div class="options" id="options"></div>
         <div id="stats">
-            <span>Pregunta: <b id="q-count">0</b></span>
             <span>Goles: <b id="score">0</b> ⚽</span>
+            <button class="btn-home" onclick="location.reload()">🏠 Menú</button>
         </div>
     </div>
 </div>
 
 <script>
-    // BASE DE DATOS INTEGRADA (Mínimo esfuerzo: añade aquí todas las que quieras)
     const db = [
         // NIVEL 1: CANTERA
-        {"d": 1, "q": "¿Quién ganó el Mundial de Qatar 2022 con Argentina?", "a": ["Lionel Messi", "Cristiano Ronaldo", "Mbappé"], "c": 0},
-        {"d": 1, "q": "¿En qué club juega Lamine Yamal?", "a": ["Real Madrid", "FC Barcelona", "Man. City"], "c": 1},
-        {"d": 1, "q": "¿Cuántos Balones de Oro tiene Messi?", "a": ["5", "7", "8"], "c": 2},
-        {"d": 1, "q": "¿Cómo se llama el estadio del Real Madrid?", "a": ["Camp Nou", "Santiago Bernabéu", "San Siro"], "c": 1},
-        {"d": 1, "q": "¿Qué selección ganó la Eurocopa 2024?", "a": ["Francia", "Inglaterra", "España"], "c": 2},
-        {"d": 1, "q": "¿En qué país juega Cristiano Ronaldo?", "a": ["USA", "Arabia Saudí", "Portugal"], "c": 1},
-        {"d": 1, "q": "¿Quién ganó la Champions League 2024?", "a": ["Dortmund", "Man. City", "Real Madrid"], "c": 2},
-        {"d": 1, "q": "¿Cuál es el color de la camiseta de Brasil?", "a": ["Azul", "Amarillo", "Verde"], "c": 1},
-        {"d": 1, "q": "¿En qué ciudad está el Camp Nou?", "a": ["Madrid", "Barcelona", "Sevilla"], "c": 1},
-        {"d": 1, "q": "¿Qué país ganó la Copa América 2024?", "a": ["Argentina", "Colombia", "Brasil"], "c": 0},
-        {"d": 1, "q": "¿Qué equipo ganó el Mundial de Sudáfrica 2010?", "a": ["Holanda", "España", "Alemania"], "c": 1},
-        {"d": 1, "q": "¿Quién es apodado 'La Pulga'?", "a": ["Cristiano", "Maradona", "Messi"], "c": 2},
-        {"d": 1, "q": "¿Cuántos jugadores hay en el campo por equipo?", "a": ["7", "11", "12"], "c": 1},
+        {"d": 1, "q": "¿Quién ganó el Mundial de Qatar 2022 con Argentina?", "a": ["Messi", "Cristiano", "Neymar"], "c": 0},
+        {"d": 1, "q": "¿En qué club juega Lamine Yamal?", "a": ["Real Madrid", "FC Barcelona", "PSG"], "c": 1},
+        {"d": 1, "q": "¿Cómo se llama el estadio del Real Madrid?", "a": ["Santiago Bernabéu", "Camp Nou", "Metropolitano"], "c": 0},
+        {"d": 1, "q": "¿Qué selección es 'La Canarinha'?", "a": ["Argentina", "Uruguay", "Brasil"], "c": 2},
         {"d": 1, "q": "¿Quién usa guantes en el equipo?", "a": ["Delantero", "Portero", "Defensa"], "c": 1},
-        {"d": 1, "q": "¿En qué país nació Pelé?", "a": ["Argentina", "Uruguay", "Brasil"], "c": 2},
+        {"d": 1, "q": "¿Cuántos jugadores hay por equipo en el campo?", "a": ["7", "11", "12"], "c": 1},
+        {"d": 1, "q": "¿De qué color es la tarjeta que te echa del partido?", "a": ["Verde", "Amarilla", "Roja"], "c": 2},
+        {"d": 1, "q": "¿En qué ciudad juega el FC Barcelona?", "a": ["Madrid", "Barcelona", "Sevilla"], "c": 1},
 
         // NIVEL 2: PROFESIONAL
-        {"d": 2, "q": "¿Qué equipo ganó el 'Sextete' en 2009?", "a": ["Bayern", "FC Barcelona", "Inter"], "c": 1},
-        {"d": 2, "q": "¿Quién marcó el gol de la victoria en el Mundial 2014?", "a": ["Götze", "Müller", "Klose"], "c": 0},
-        {"d": 2, "q": "¿Cuántas Champions seguidas ganó Zidane como DT?", "a": ["2", "3", "4"], "c": 1},
-        {"d": 2, "q": "¿Quién era el portero de España en 2010?", "a": ["Valdés", "Casillas", "Reina"], "c": 1},
-        {"d": 2, "q": "¿Qué equipo ganó la Champions 2023 en Estambul?", "a": ["Inter", "Real Madrid", "Man. City"], "c": 2},
-        {"d": 2, "q": "¿En qué club jugaba Neymar antes de ir al PSG?", "a": ["Real Madrid", "FC Barcelona", "Santos"], "c": 1},
+        {"d": 2, "q": "¿Qué equipo ganó el 'Sextete' en 2009?", "a": ["Bayern", "Barcelona", "Inter"], "c": 1},
+        {"d": 2, "q": "¿Quién marcó el gol de España en la final de 2010?", "a": ["Villa", "Iniesta", "Torres"], "c": 1},
+        {"d": 2, "q": "¿Qué selección eliminó a Brasil por 1-7 en 2014?", "a": ["Alemania", "Argentina", "Francia"], "c": 0},
+        {"d": 2, "q": "¿Cuántas Champions seguidas ganó Zidane?", "a": ["2", "3", "4"], "c": 1},
+        {"d": 2, "q": "¿En qué club jugaba Neymar antes de ir al PSG?", "a": ["Real Madrid", "Barça", "Santos"], "c": 1},
         {"d": 2, "q": "¿Quién ganó el Balón de Oro en 2022?", "a": ["Benzema", "Messi", "Modric"], "c": 0},
-        {"d": 2, "q": "¿En qué país se celebró el Mundial 2014?", "a": ["Rusia", "Brasil", "Sudáfrica"], "c": 1},
-        {"d": 2, "q": "¿Qué selección eliminó a Brasil por 1-7?", "a": ["Argentina", "Francia", "Alemania"], "c": 2},
         {"d": 2, "q": "¿Qué dorsal llevó Ronaldinho en el Barça?", "a": ["7", "10", "11"], "c": 1},
 
         // NIVEL 3: ÉLITE MUNDIAL
         {"d": 3, "q": "¿Quién fue el MVP de la final de Champions 2024?", "a": ["Vinícius Jr", "Carvajal", "Bellingham"], "c": 1},
-        {"d": 3, "q": "¿Qué selección africana llegó a semis en 2022?", "a": ["Ghana", "Senegal", "Marruecos"], "c": 2},
-        {"d": 3, "q": "¿Qué equipo terminó invicto la Premier 2003-04?", "a": ["Man. United", "Chelsea", "Arsenal"], "c": 2},
+        {"d": 3, "q": "¿Qué equipo terminó invicto la Premier 2003-04?", "a": ["United", "Chelsea", "Arsenal"], "c": 2},
         {"d": 3, "q": "¿Quién ganó el Balón de Oro 2004?", "a": ["Ronaldinho", "Shevchenko", "Deco"], "c": 1},
         {"d": 3, "q": "¿En qué estadio será la final del Mundial 2026?", "a": ["Azteca", "MetLife Stadium", "SoFi"], "c": 1},
         {"d": 3, "q": "¿Qué dorsal llevaba Zidane en el Real Madrid?", "a": ["5", "10", "21"], "c": 0},
-        {"d": 3, "q": "¿Qué equipo cortó la racha de 11 Bundesligas del Bayern en 2024?", "a": ["Dortmund", "Leverkusen", "Leipzig"], "c": 1},
-        {"d": 3, "q": "¿Qué portero no encajó goles en eliminatorias del Mundial 2010?", "a": ["Casillas", "Neuer", "Buffon"], "c": 0},
-        {"d": 3, "q": "¿Quién ganó el Balón de Oro 2007?", "a": ["Cristiano", "Kaká", "Messi"], "c": 1},
-        {"d": 3, "q": "¿Cuántas Eurocopas seguidas ganó España (2008-2012)?", "a": ["Una", "Dos", "Tres"], "c": 1}
+        {"d": 3, "q": "¿Qué portero no encajó goles en eliminatorias de 2010?", "a": ["Casillas", "Neuer", "Buffon"], "c": 0},
+        {"d": 3, "q": "¿Qué equipo cortó la racha del Bayern en 2024?", "a": ["Dortmund", "Leverkusen", "Leipzig"], "c": 1}
     ];
 
-    let currentIdx = 0;
+    let currentPool = [];
     let score = 0;
     let timer;
-    let difficulty = 1;
-    let usedInLevel = [];
+    let selectedLevel = 1;
+    let usedQuestions = [];
 
     const READ_TIME = 3000;
     const ACTION_TIME = 8000;
 
-    function init() {
-        showQuestion();
+    function startGame(lvl) {
+        selectedLevel = lvl;
+        currentPool = db.filter(q => q.d === lvl);
+        usedQuestions = [];
+        score = 0;
+        
+        document.getElementById('screen-start').classList.add('hidden');
+        document.getElementById('screen-game').classList.remove('hidden');
+        document.getElementById('lvl-display').innerText = lvl==1 ? "MODO: CANTERA" : lvl==2 ? "MODO: PROFESIONAL" : "MODO: ÉLITE MUNDIAL";
+        
+        nextQuestion();
     }
 
-    function showQuestion() {
-        // Filtrar por dificultad
-        let pool = db.filter(q => q.d === difficulty);
+    function nextQuestion() {
+        let available = currentPool.filter(q => !usedQuestions.includes(q));
         
-        // Si usamos todas las de este nivel, resetear historial del nivel
-        let available = pool.filter(q => !usedInLevel.includes(q));
+        // Si se acaban las preguntas del nivel, resetear para que sea infinito
         if(available.length === 0) {
-            usedInLevel = usedInLevel.filter(q => q.d !== difficulty);
-            available = pool;
+            usedQuestions = [];
+            available = currentPool;
         }
 
         const data = available[Math.floor(Math.random() * available.length)];
-        usedInLevel.push(data);
-        currentIdx++;
+        usedQuestions.push(data);
 
-        // UI
         document.getElementById('q-text').innerText = data.q;
-        document.getElementById('q-count').innerText = currentIdx;
-        const tag = document.getElementById('lvl-tag');
-        tag.innerText = data.d === 1 ? "Cantera" : data.d === 2 ? "Profesional" : "Élite Mundial";
-        tag.style.background = data.d === 1 ? "var(--n1)" : data.d === 2 ? "var(--n2)" : "var(--n3)";
-        tag.style.color = data.d === 3 ? "white" : "black";
-
         const opts = document.getElementById('options');
         opts.innerHTML = '';
+        
         data.a.forEach((opt, i) => {
             const b = document.createElement('button');
-            b.className = 'btn';
+            b.className = 'btn-opt';
             b.innerText = opt;
             b.onclick = () => check(i, data.c, b);
             opts.appendChild(b);
@@ -136,10 +145,10 @@
         const status = document.getElementById('status');
         bar.style.width = '100%';
         bar.style.background = '#475569';
-        status.innerText = "⚽ Lee la jugada...";
+        status.innerText = "⚽ Analizando jugada... (LEE)";
 
         setTimeout(() => {
-            if(usedInLevel[usedInLevel.length-1] === data) {
+            if(usedQuestions[usedQuestions.length-1] === data) {
                 status.innerText = "🔥 ¡DISPARA!";
                 bar.style.background = "var(--gold)";
                 startTimer();
@@ -154,29 +163,26 @@
             let elapsed = Date.now() - start;
             let per = 100 - (elapsed / ACTION_TIME * 100);
             document.getElementById('timer-bar').style.width = per + '%';
-            if(per <= 0) { clearInterval(timer); check(-1, usedInLevel[usedInLevel.length-1].c, null); }
+            if(per <= 0) { clearInterval(timer); check(-1, usedQuestions[usedQuestions.length-1].c, null); }
         }, 50);
     }
 
     function check(sel, cor, btn) {
         clearInterval(timer);
-        const btns = document.querySelectorAll('.btn');
+        const btns = document.querySelectorAll('.btn-opt');
         btns.forEach(b => b.disabled = true);
 
         if(sel === cor) {
-            btn.classList.add('correct');
+            if(btn) btn.classList.add('correct');
             score++;
-            if(score % 5 === 0 && difficulty < 3) difficulty++;
         } else {
             if(btn) btn.classList.add('wrong');
             btns[cor].classList.add('correct');
         }
 
         document.getElementById('score').innerText = score;
-        setTimeout(showQuestion, 1500);
+        setTimeout(nextQuestion, 1500);
     }
-
-    init();
 </script>
 </body>
 </html>
