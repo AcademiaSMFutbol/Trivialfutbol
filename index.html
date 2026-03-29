@@ -3,183 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fútbol Máster Pro JSON</title>
+    <title>Fútbol Máster - Anti-Repetición</title>
     <style>
         :root {
             --bg: #0f172a; --card: #1e293b; --gold: #fbce07; --white: #f8fafc;
             --n1: #22c55e; --n2: #f97316; --n3: #ef4444;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--white); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow-x: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--white); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         #game-container { background: var(--card); width: 95%; max-width: 650px; padding: 2.5rem; border-radius: 2rem; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); }
-        
-        .menu-title { font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--gold); }
-        .level-select { display: grid; gap: 15px; margin-top: 2rem; }
+        .menu-title { font-size: 2.5rem; margin-bottom: 2rem; color: var(--gold); }
+        .level-select { display: grid; gap: 15px; }
         .btn-lvl { padding: 20px; border-radius: 15px; border: none; cursor: pointer; font-size: 1.2rem; font-weight: bold; transition: 0.3s; color: #000; }
-        .btn-lvl:hover { transform: scale(1.03); filter: brightness(1.1); }
-        .btn-lvl:disabled { opacity: 0.5; cursor: not-allowed; }
-
         .bar-container { width: 100%; height: 10px; background: #334155; border-radius: 5px; margin: 20px 0; overflow: hidden; }
         #timer-bar { width: 100%; height: 100%; background: var(--gold); transition: width 0.1s linear; }
-        .q-text { font-size: 1.5rem; font-weight: bold; margin-bottom: 2rem; min-height: 4.5rem; display: flex; align-items: center; justify-content: center; }
+        .q-text { font-size: 1.5rem; font-weight: bold; margin-bottom: 2rem; min-height: 5rem; display: flex; align-items: center; justify-content: center; }
         .options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         @media (max-width: 480px) { .options { grid-template-columns: 1fr; } }
-        
-        button.btn-opt { display: block; width: 100%; padding: 16px; background: rgba(255,255,255,0.05); border: 1px solid #475569; color: white; border-radius: 12px; cursor: pointer; font-size: 1.1rem; transition: 0.2s; }
-        button.btn-opt:hover:not(:disabled) { background: rgba(255,255,255,0.12); border-color: var(--gold); }
-        
-        .correct { background: var(--n1) !important; color: #052e16 !important; font-weight: bold; border-color: var(--n1) !important; }
-        .wrong { background: var(--n3) !important; border-color: var(--n3) !important; }
-        
+        button.btn-opt { display: block; width: 100%; padding: 16px; background: rgba(255,255,255,0.05); border: 1px solid #475569; color: white; border-radius: 12px; cursor: pointer; font-size: 1.1rem; }
+        .correct { background: var(--n1) !important; color: #052e16 !important; font-weight: bold; }
+        .wrong { background: var(--n3) !important; }
         #stats { margin-top: 25px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #334155; padding-top: 15px; }
-        .btn-home { background: none; border: 1px solid var(--gold); color: var(--gold); padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div id="screen-loading">
-        <h2 color="var(--gold)">⚽ Cargando preguntas...</h2>
-    </div>
+    <div id="screen-loading"><h2>⚽ Cargando mazo de preguntas...</h2></div>
 
     <div id="screen-start" class="hidden">
-        <h1 class="menu-title">⚽ FÚTBOL MÁSTER</h1>
-        <p style="opacity: 0.8;">Base de datos lista. Elige dificultad:</p>
+        <h1 class="menu-title">FÚTBOL MÁSTER</h1>
         <div class="level-select">
             <button class="btn-lvl" style="background: var(--n1);" onclick="startGame(1)">🌱 CANTERA</button>
             <button class="btn-lvl" style="background: var(--n2);" onclick="startGame(2)">🏆 PROFESIONAL</button>
             <button class="btn-lvl" style="background: var(--n3); color: white;" onclick="startGame(3)">🔥 ÉLITE MUNDIAL</button>
         </div>
+        <p id="total-info" style="margin-top:20px; font-size:0.8rem; opacity:0.6;"></p>
     </div>
 
     <div id="screen-game" class="hidden">
-        <div id="lvl-display" style="font-weight: bold; color: var(--gold); font-size: 0.9rem; letter-spacing: 2px;"></div>
+        <div id="lvl-display" style="font-weight: bold; color: var(--gold); letter-spacing: 2px; font-size: 0.8rem;"></div>
         <div class="bar-container"><div id="timer-bar"></div></div>
         <div id="status" style="height: 1.2rem; margin-bottom: 10px; font-size: 0.9rem; font-weight: bold; color: var(--gold);"></div>
-        <div class="q-text" id="q-text">Cargando jugada...</div>
+        <div class="q-text" id="q-text"></div>
         <div class="options" id="options"></div>
         <div id="stats">
             <span>Goles: <b id="score">0</b> ⚽</span>
-            <span id="q-count" style="font-size: 0.8rem; opacity: 0.6;"></span>
-            <button class="btn-home" onclick="location.reload()">🏠 INICIO</button>
+            <span id="remaining" style="font-size: 0.8rem; opacity: 0.6;"></span>
+            <button onclick="location.reload()" style="background:none; border:1px solid var(--gold); color:var(--gold); cursor:pointer; padding:5px 10px; border-radius:5px;">🏠 Salir</button>
         </div>
     </div>
 </div>
 
 <script>
-    let db = []; // Aquí se guardarán las 100 preguntas del JSON
-    let deck = []; 
+    let rawDB = []; 
+    let activeDeck = []; 
+    let globalUsedHashes = new Set(); // Para asegurar que no se repitan nunca
     let score = 0;
     let timer;
-    let selectedLevel = 1;
-    let totalAnswered = 0;
+    let currentLvl = 1;
 
-    const READ_TIME = 3000;
-    const ACTION_TIME = 8000;
-
-    // --- FUNCIÓN PARA LEER EL JSON ---
-    async function loadQuestions() {
+    // 1. CARGA EL JSON (Añadimos un parámetro random para evitar que el navegador use la versión vieja)
+    async function init() {
         try {
-            // Buscamos el archivo en la misma carpeta
-            const response = await fetch('preguntas.json');
-            if (!response.ok) throw new Error("No se pudo cargar el JSON");
-            
-            db = await response.json();
-            
-            // Si todo va bien, mostramos el menú y ocultamos el cargando
+            const response = await fetch('preguntas.json?v=' + Math.random());
+            rawDB = await response.json();
             document.getElementById('screen-loading').classList.add('hidden');
             document.getElementById('screen-start').classList.remove('hidden');
-        } catch (error) {
-            document.getElementById('screen-loading').innerHTML = 
-                `<h2 style="color:red">⚠️ Error al cargar preguntas.json</h2>
-                 <p>Revisa que el archivo esté en GitHub con ese nombre exacto.</p>`;
-            console.error(error);
+            document.getElementById('total-info').innerText = `Base de datos: ${rawDB.length} preguntas detectadas.`;
+        } catch (e) {
+            document.getElementById('screen-loading').innerHTML = "<h2 style='color:red'>Error cargando preguntas.json</h2>";
         }
     }
 
     function startGame(lvl) {
-        selectedLevel = lvl;
+        currentLvl = lvl;
         score = 0;
-        totalAnswered = 0;
+        // Filtramos y barajamos el mazo al empezar
+        activeDeck = rawDB.filter(q => parseInt(q.d) === lvl);
+        activeDeck.sort(() => Math.random() - 0.5);
         
-        prepareDeck();
-        
-        // Si el nivel elegido no tiene preguntas en el JSON
-        if(deck.length === 0) {
-            alert("No hay preguntas en el JSON para este nivel todavía.");
+        if(activeDeck.length === 0) {
+            alert("No hay preguntas para este nivel en el JSON.");
             return;
         }
 
         document.getElementById('screen-start').classList.add('hidden');
         document.getElementById('screen-game').classList.remove('hidden');
-        document.getElementById('lvl-display').innerText = lvl==1 ? "MODO: CANTERA" : lvl==2 ? "MODO: PROFESIONAL" : "MODO: ÉLITE MUNDIAL";
-        document.getElementById('score').innerText = "0";
+        document.getElementById('lvl-display').innerText = lvl==1 ? "CANTERA" : lvl==2 ? "PROFESIONAL" : "ÉLITE";
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        // Si el mazo se acaba, avisamos o reiniciamos
+        if(activeDeck.length === 0) {
+            document.getElementById('q-text').innerText = "¡Has completado todas las preguntas de este nivel!";
+            document.getElementById('options').innerHTML = '<button class="btn-lvl" style="background:var(--gold); width:100%" onclick="location.reload()">Volver al Inicio</button>';
+            return;
+        }
+
+        const data = activeDeck.pop(); // Sacamos la última (imposible repetir en esta sesión)
         
-        nextQuestion();
-    }
-
-    function prepareDeck() {
-        // Filtramos por nivel según lo que diga el JSON (d: 1, 2 o 3)
-        deck = db.filter(q => parseInt(q.d) === selectedLevel);
-        // Barajamos
-        for (let i = deck.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [deck[i], deck[j]] = [deck[j], deck[i]];
-        }
-    }
-
-    function nextQuestion() {
-        if(deck.length === 0) {
-            prepareDeck();
-        }
-
-        const data = deck.pop();
-        totalAnswered++;
-
         document.getElementById('q-text').innerText = data.q;
-        document.getElementById('q-count').innerText = `Pregunta ${totalAnswered}`;
+        document.getElementById('remaining').innerText = `Restantes: ${activeDeck.length}`;
+        document.getElementById('score').innerText = score;
+        
         const opts = document.getElementById('options');
         opts.innerHTML = '';
-        
         data.a.forEach((opt, i) => {
             const b = document.createElement('button');
             b.className = 'btn-opt';
             b.innerText = opt;
-            b.onclick = () => check(i, data.c, b, data);
+            b.onclick = () => checkAnswer(i, data.c, b, data);
             opts.appendChild(b);
         });
 
+        // Temporizador
+        resetTimer(data);
+    }
+
+    function resetTimer(data) {
+        clearInterval(timer);
         const bar = document.getElementById('timer-bar');
         const status = document.getElementById('status');
         bar.style.width = '100%';
-        bar.style.background = '#475569';
-        status.innerText = "👀 Analizando jugada...";
-
+        status.innerText = "⚽ Lee la jugada...";
+        
         setTimeout(() => {
-            if(!document.getElementById('screen-game').classList.contains('hidden')) {
-                status.innerText = "🔥 ¡DISPARA!";
-                bar.style.background = "var(--gold)";
-                startTimer(data);
-            }
-        }, READ_TIME);
+            status.innerText = "🔥 ¡DISPARA!";
+            let start = Date.now();
+            timer = setInterval(() => {
+                let diff = Date.now() - start;
+                let per = 100 - (diff / 8000 * 100);
+                bar.style.width = per + '%';
+                if(per <= 0) { clearInterval(timer); checkAnswer(-1, data.c, null, data); }
+            }, 50);
+        }, 3000);
     }
 
-    function startTimer(currentData) {
-        let start = Date.now();
-        clearInterval(timer);
-        timer = setInterval(() => {
-            let elapsed = Date.now() - start;
-            let per = 100 - (elapsed / ACTION_TIME * 100);
-            document.getElementById('timer-bar').style.width = per + '%';
-            if(per <= 0) { 
-                clearInterval(timer); 
-                check(-1, currentData.c, null, currentData); 
-            }
-        }, 50);
-    }
-
-    function check(sel, cor, btn, currentData) {
+    function checkAnswer(sel, cor, btn, data) {
         clearInterval(timer);
         const btns = document.querySelectorAll('.btn-opt');
         btns.forEach(b => b.disabled = true);
@@ -189,15 +151,12 @@
             score++;
         } else {
             if(btn) btn.classList.add('wrong');
-            btns[cor].classList.add('correct');
+            if(btns[cor]) btns[cor].classList.add('correct');
         }
-
-        document.getElementById('score').innerText = score;
-        setTimeout(nextQuestion, 2000);
+        setTimeout(renderQuestion, 2000);
     }
 
-    // Iniciar carga del JSON al abrir la web
-    loadQuestions();
+    init();
 </script>
 </body>
 </html>
